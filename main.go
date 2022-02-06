@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -31,7 +32,6 @@ var db *gorm.DB
 
 var err error
 
-
 var (
     parents = []Parent{
         {Nama: "Jimmy Johnson", Email: "Jimmy@gmail.com", Password:"pplkel37"},
@@ -49,10 +49,7 @@ var (
 
 func main() {	
 	router := mux.NewRouter()
-	db, err = gorm.Open("postgres", "host=ec2-52-213-119-221.eu-west-1.compute.amazonaws.com port=5432 user=rdulpadeipmwvr dbname=d93bbe48ni70dp sslmode=disable password=2cf4c3b493be5216e5309be9837d987e6be5294c696314809eed1702a230d15b")
-/*	dsn := "host=ec2-52-213-119-221.eu-west-1.compute.amazonaws.com user=rdulpadeipmwvr password=2cf4c3b493be5216e5309be9837d987e6be5294c696314809eed1702a230d15b dbname=d93bbe48ni70dp port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-*/
+	db, err = gorm.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s/%s", "rdulpadeipmwvr", "2cf4c3b493be5216e5309be9837d987e6be5294c696314809eed1702a230d15b", "ec2-52-213-119-221.eu-west-1.compute.amazonaws.com", "d93bbe48ni70dp"))
 
 	if err != nil {
 	  panic("failed to connect database")
