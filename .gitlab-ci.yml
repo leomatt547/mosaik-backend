@@ -1,0 +1,27 @@
+image: golang:1.10-alpine3.7
+
+variables:
+  REPO_NAME: gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend
+
+before_script:
+  - go version
+
+stages:
+  - test
+  - build
+
+test:
+  stage: test
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME
+    - cd $GOPATH/src/$REPO_NAME
+    - go test $(go list ./... | grep -v /vendor/)
+
+build:
+  stage: build
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME
+    - go build -o mosaik-backend
