@@ -1,4 +1,4 @@
-image: golang:1.10-alpine3.7
+image: golang:1.10
 
 variables:
   REPO_NAME: gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend
