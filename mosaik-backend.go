@@ -74,7 +74,6 @@ func main() {
 	router.HandleFunc("/childs/{id}", DeleteChild).Methods("DELETE")
 
 	handler := cors.Default().Handler(router)
-	
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
