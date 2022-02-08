@@ -2,19 +2,18 @@ package seed
 
 import (
 	"log"
-
 	"mosaik/api/models"
 
 	"github.com/jinzhu/gorm"
 )
 
 var parents = []models.Parent{
-	models.Parent{
+	{
 		Nama: "Steven victor",
 		Email:    "steven@gmail.com",
 		Password: "password",
 	},
-	models.Parent{
+	{
 		Nama: "Martin Luther",
 		Email:    "luther@gmail.com",
 		Password: "password",
@@ -22,15 +21,17 @@ var parents = []models.Parent{
 }
 
 var childs = []models.Child{
-	models.Child{
+	{
 		Nama: "Steven victor Jr",
 		Email:    "steven_jr@gmail.com",
 		Password: "password",
+		ParentID: 1,
 	},
-	models.Child{
-		Nama: "Steven victor Jr",
-		Email:    "steven_jr@gmail.com",
+	{
+		Nama: "Martin Luther",
+		Email:    "luther@gmail.com",
 		Password: "password",
+		ParentID: 2,
 	},
 }
 
@@ -44,21 +45,21 @@ func Load(db *gorm.DB) {
 		log.Fatalf("cannot migrate table: %v", err)
 	}
 
-	err = db.Debug().Model(&models.Child{}).AddForeignKey("child_id", "parents(id)", "cascade", "cascade").Error
+	err = db.Debug().Model(&models.Child{}).AddForeignKey("parent_id", "parents(id)", "cascade", "cascade").Error
 	if err != nil {
 		log.Fatalf("attaching foreign key error: %v", err)
 	}
 
 	for i, _ := range parents {
-		err = db.Debug().Model(&models.Child{}).Create(&parents[i]).Error
+		err = db.Debug().Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed parents table: %v", err)
 		}
 		childs[i].ParentID = parents[i].ID
 
-		err = db.Debug().Model(&models.Parent{}).Create(&childs[i]).Error
+		err = db.Debug().Model(&models.Child{}).Create(&childs[i]).Error
 		if err != nil {
-			log.Fatalf("cannot seed parents table: %v", err)
+			log.Fatalf("cannot seed childs table: %v", err)
 		}
 	}
 }
