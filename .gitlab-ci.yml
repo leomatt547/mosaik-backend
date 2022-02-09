@@ -22,7 +22,7 @@ test model:
   stage: test
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME/tests/modeltests
-    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/tests/modeltests
+    - mv $CI_PROJECT_DIR/api/models $GOPATH/src/$REPO_NAME/tests/modeltests
     - cd $GOPATH/src/$REPO_NAME/tests/modeltests
     - go test $(go list ./... | grep -v /vendor/)
 
