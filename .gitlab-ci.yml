@@ -13,7 +13,7 @@ before_script:
   - go get -v -u github.com/dgrijalva/jwt-go
   - go get -v -u github.com/badoux/checkmail
   - go get -v -u golang.org/x/crypto/bcrypt
-  - go get gopkg.in/go-playground/assert.v2
+  - go get github.com/go-playground/assert
 
 stages:
   - test
