@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"mosaik-backend/api/models"
+	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/models"
 
 	//_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql driver
 	"github.com/go-playground/assert/v2"

@@ -2,9 +2,10 @@ package middlewares
 
 import (
 	"errors"
-	"mosaik-backend/api/auth"
-	"mosaik-backend/api/responses"
 	"net/http"
+
+	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/auth"
+	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/responses"
 )
 
 func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
