@@ -50,13 +50,13 @@ func (p *Parent) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
 		if p.Nama == "" {
-			return errors.New("required nama")
+			return errors.New("butuh nama")
 		}
 		if p.Password == "" {
-			return errors.New("required password")
+			return errors.New("butuh password")
 		}
 		if p.Email == "" {
-			return errors.New("required email")
+			return errors.New("butuh email")
 		}
 		if err := checkmail.ValidateFormat(p.Email); err != nil {
 			return errors.New("invalid email")
@@ -65,10 +65,10 @@ func (p *Parent) Validate(action string) error {
 		return nil
 	case "login":
 		if p.Password == "" {
-			return errors.New("required Password")
+			return errors.New("butuh password")
 		}
 		if p.Email == "" {
-			return errors.New("required Email")
+			return errors.New("butuh email")
 		}
 		if err := checkmail.ValidateFormat(p.Email); err != nil {
 			return errors.New("invalid email")
@@ -77,13 +77,13 @@ func (p *Parent) Validate(action string) error {
 
 	default:
 		if p.Nama == "" {
-			return errors.New("required nama")
+			return errors.New("butuh nama")
 		}
 		if p.Password == "" {
-			return errors.New("required password")
+			return errors.New("butuh password")
 		}
 		if p.Email == "" {
-			return errors.New("required email")
+			return errors.New("butuh email")
 		}
 		if err := checkmail.ValidateFormat(p.Email); err != nil {
 			return errors.New("invalid email")

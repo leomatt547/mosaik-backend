@@ -13,8 +13,8 @@ import (
 )
 
 var server = controllers.Server{}
-var parentInstance = models.Parent{}
-var childInstance = models.Child{}
+// var parentInstance = models.Parent{}
+// var childInstance = models.Child{}
 
 func TestMain(m *testing.M) {
 	var err error
@@ -35,7 +35,7 @@ func Database() {
 	TestDbDriver := os.Getenv("TestDbDriver")
 
 	// if TestDbDriver == "mysql" {
-	// 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("TestDbUser"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
+	// 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("TestDbParent"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
 	// 	server.DB, err = gorm.Open(TestDbDriver, DBURL)
 	// 	if err != nil {
 	// 		fmt.Printf("Cannot connect to %s database\n", TestDbDriver)
@@ -56,7 +56,7 @@ func Database() {
 	}
 }
 
-func refreshUserTable() error {
+func refreshParentTable() error {
 	err := server.DB.DropTableIfExists(&models.Parent{}).Error
 	if err != nil {
 		return err
@@ -69,9 +69,9 @@ func refreshUserTable() error {
 	return nil
 }
 
-func seedOneUser() (models.Parent, error) {
+func seedOneParent() (models.Parent, error) {
 
-	err := refreshUserTable()
+	err := refreshParentTable()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,19 +89,19 @@ func seedOneUser() (models.Parent, error) {
 	return parent, nil
 }
 
-func seedUsers() ([]models.Parent, error) {
+func seedParents() ([]models.Parent, error) {
 
 	var err error
 	if err != nil {
 		return nil, err
 	}
 	parents := []models.Parent{
-		models.Parent{
+		{
 			Nama: "Steven victor",
 			Email:    "steven@gmail.com",
 			Password: "password",
 		},
-		models.Parent{
+		{
 			Nama: "Kenny Morris",
 			Email:    "kenny@gmail.com",
 			Password: "password",
@@ -116,7 +116,7 @@ func seedUsers() ([]models.Parent, error) {
 	return parents, nil
 }
 
-func refreshUserAndPostTable() error {
+func refreshParentAndChildTable() error {
 
 	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}).Error
 	if err != nil {
@@ -130,9 +130,9 @@ func refreshUserAndPostTable() error {
 	return nil
 }
 
-func seedOneUserAndOnePost() (models.Child, error) {
+func seedOneParentAndOneChild() (models.Child, error) {
 
-	err := refreshUserAndPostTable()
+	err := refreshParentAndChildTable()
 	if err != nil {
 		return models.Child{}, err
 	}
@@ -157,7 +157,7 @@ func seedOneUserAndOnePost() (models.Child, error) {
 	return child, nil
 }
 
-func seedUsersAndPosts() ([]models.Parent, []models.Child, error) {
+func seedParentsAndChilds() ([]models.Parent, []models.Child, error) {
 
 	var err error
 

@@ -28,6 +28,15 @@ test model:
     - cd $GOPATH/src/$REPO_NAME/tests/modeltests
     - go test -v
 
+test controller:
+  stage: test
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/tests/controllertests
+    - go test -v
+
 build:
   stage: build
   script:
