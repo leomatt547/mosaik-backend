@@ -16,4 +16,5 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lib/pq v1.1.1 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1
 )

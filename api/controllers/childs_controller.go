@@ -106,7 +106,7 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 	child := models.Child{}
 	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", pid).Take(&child).Error
 	if err != nil {
-		responses.ERROR(w, http.StatusNotFound, errors.New("Child not found"))
+		responses.ERROR(w, http.StatusNotFound, errors.New("child not found"))
 		return
 	}
 

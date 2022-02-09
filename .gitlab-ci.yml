@@ -14,12 +14,12 @@ stages:
   - test
   - build
 
-test:
+test model:
   stage: test
   script:
-    - mkdir -p $GOPATH/src/$REPO_NAME
-    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME
-    - cd $GOPATH/src/$REPO_NAME
+    - mkdir -p $GOPATH/src/$REPO_NAME/tests/modeltests
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/tests/modeltests
+    - cd $GOPATH/src/$REPO_NAME/tests/modeltests
     - go test $(go list ./... | grep -v /vendor/)
 
 build:
@@ -28,4 +28,4 @@ build:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME
-    - go build -o mosaik-backend
+    - go build -o mosaik

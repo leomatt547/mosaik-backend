@@ -29,21 +29,21 @@ func VerifyPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func (u *Parent) BeforeSave() error {
-	hashedPassword, err := Hash(u.Password)
+func (p *Parent) BeforeSave() error {
+	hashedPassword, err := Hash(p.Password)
 	if err != nil {
 		return err
 	}
-	u.Password = string(hashedPassword)
+	p.Password = string(hashedPassword)
 	return nil
 }
 
-func (u *Parent) Prepare() {
-	u.ID = 0
-	u.Nama = html.EscapeString(strings.TrimSpace(u.Nama))
-	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
-	u.CreatedAt = time.Now()
-	u.UpdatedAt = time.Now()
+func (p *Parent) Prepare() {
+	p.ID = 0
+	p.Nama = html.EscapeString(strings.TrimSpace(p.Nama))
+	p.Email = html.EscapeString(strings.TrimSpace(p.Email))
+	p.CreatedAt = time.Now()
+	p.UpdatedAt = time.Now()
 }
 
 func (p *Parent) Validate(action string) error {
@@ -92,16 +92,16 @@ func (p *Parent) Validate(action string) error {
 	}
 }
 
-func (u *Parent) SaveParent(db *gorm.DB) (*Parent, error) {
+func (p *Parent) SaveParent(db *gorm.DB) (*Parent, error) {
 	var err error
-	err = db.Debug().Create(&u).Error
+	err = db.Debug().Create(&p).Error
 	if err != nil {
 		return &Parent{}, err
 	}
-	return u, nil
+	return p, nil
 }
 
-func (u *Parent) FindAllParents(db *gorm.DB) (*[]Parent, error) {
+func (p *Parent) FindAllParents(db *gorm.DB) (*[]Parent, error) {
 	var err error
 	parents := []Parent{}
 	err = db.Debug().Model(&Parent{}).Limit(100).Find(&parents).Error
@@ -111,44 +111,44 @@ func (u *Parent) FindAllParents(db *gorm.DB) (*[]Parent, error) {
 	return &parents, err
 }
 
-func (u *Parent) FindParentByID(db *gorm.DB, uid uint32) (*Parent, error) {
+func (p *Parent) FindParentByID(db *gorm.DB, uid uint32) (*Parent, error) {
 	var err error
-	err = db.Debug().Model(Parent{}).Where("id = ?", uid).Take(&u).Error
+	err = db.Debug().Model(Parent{}).Where("id = ?", uid).Take(&p).Error
 	if err != nil {
 		return &Parent{}, err
 	}
 	if gorm.IsRecordNotFoundError(err) {
 		return &Parent{}, errors.New("Parent Not Found")
 	}
-	return u, err
+	return p, err
 }
 
-func (u *Parent) UpdateAParent(db *gorm.DB, uid uint32) (*Parent, error) {
+func (p *Parent) UpdateAParent(db *gorm.DB, uid uint32) (*Parent, error) {
 	// To hash the password
-	err := u.BeforeSave()
+	err := p.BeforeSave()
 	if err != nil {
 		log.Fatal(err)
 	}
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
-			"password":  u.Password,
-			"nama":  u.Nama,
-			"email":     u.Email,
-			"update_at": time.Now(),
+			"password":  p.Password,
+			"nama":  p.Nama,
+			"email":     p.Email,
+			"updated_at": time.Now(),
 		},
 	)
 	if db.Error != nil {
 		return &Parent{}, db.Error
 	}
 	// This is the display the updated parent
-	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&u).Error
+	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
 	if err != nil {
 		return &Parent{}, err
 	}
-	return u, nil
+	return p, nil
 }
 
-func (u *Parent) DeleteAParent(db *gorm.DB, uid uint32) (int64, error) {
+func (p *Parent) DeleteAParent(db *gorm.DB, uid uint32) (int64, error) {
 
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).Delete(&Parent{})
 
