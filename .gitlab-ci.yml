@@ -21,9 +21,8 @@ stages:
 test model:
   stage: test
   script:
-    - mkdir -p $GOPATH/src/$REPO_NAME/tests/modeltests
-    - ls $CI_PROJECT_DIR
-    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/tests/modeltests
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME
     - cd $GOPATH/src/$REPO_NAME/tests/modeltests
     - go test -v
 
