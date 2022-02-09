@@ -11,7 +11,7 @@ import (
 	//_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql database driver
 	_ "github.com/jinzhu/gorm/dialects/postgres" //postgres database driver
 
-	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/models"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
 )
 
 type Server struct {

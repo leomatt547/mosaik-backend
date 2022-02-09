@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/controllers"
-	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/seed"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/controllers"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/seed"
 
 	"github.com/joho/godotenv"
 )

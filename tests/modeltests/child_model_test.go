@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend/api/models"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
 
 	"github.com/go-playground/assert/v2"
 	_ "github.com/jinzhu/gorm/dialects/postgres"

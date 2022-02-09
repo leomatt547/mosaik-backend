@@ -1,7 +1,7 @@
 image: golang:1.10
 
 variables:
-  REPO_NAME: gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend
+  REPO_NAME: gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend
 
 before_script:
   - go version
@@ -34,4 +34,4 @@ build:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME
-    - go build -o mosaik
+    - go build -o mosaik-backend

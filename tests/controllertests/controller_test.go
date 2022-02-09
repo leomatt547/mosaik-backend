@@ -1,4 +1,4 @@
-package modeltests
+package controllertests
 
 import (
 	"fmt"
@@ -6,11 +6,10 @@ import (
 	"os"
 	"testing"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/controllers"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
-
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/controllers"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
 )
 
 var server = controllers.Server{}
@@ -24,7 +23,9 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Error getting env %v\n", err)
 	}
 	Database()
+
 	os.Exit(m.Run())
+
 }
 
 func Database() {
@@ -34,7 +35,7 @@ func Database() {
 	TestDbDriver := os.Getenv("TestDbDriver")
 
 	// if TestDbDriver == "mysql" {
-	// 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("TestDbParent"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
+	// 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("TestDbUser"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
 	// 	server.DB, err = gorm.Open(TestDbDriver, DBURL)
 	// 	if err != nil {
 	// 		fmt.Printf("Cannot connect to %s database\n", TestDbDriver)
@@ -55,7 +56,7 @@ func Database() {
 	}
 }
 
-func refreshParentTable() error {
+func refreshUserTable() error {
 	err := server.DB.DropTableIfExists(&models.Parent{}).Error
 	if err != nil {
 		return err
@@ -68,9 +69,12 @@ func refreshParentTable() error {
 	return nil
 }
 
-func seedOneParent() (models.Parent, error) {
+func seedOneUser() (models.Parent, error) {
 
-	refreshParentTable()
+	err := refreshUserTable()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	parent := models.Parent{
 		Nama: "Pet",
@@ -78,38 +82,41 @@ func seedOneParent() (models.Parent, error) {
 		Password: "password",
 	}
 
-	err := server.DB.Model(&models.Parent{}).Create(&parent).Error
+	err = server.DB.Model(&models.Parent{}).Create(&parent).Error
 	if err != nil {
-		log.Fatalf("cannot seed Parents table: %v", err)
+		return models.Parent{}, err
 	}
 	return parent, nil
 }
 
-func seedParents() error {
+func seedUsers() ([]models.Parent, error) {
 
+	var err error
+	if err != nil {
+		return nil, err
+	}
 	parents := []models.Parent{
-		{
+		models.Parent{
 			Nama: "Steven victor",
 			Email:    "steven@gmail.com",
 			Password: "password",
 		},
-		{
+		models.Parent{
 			Nama: "Kenny Morris",
 			Email:    "kenny@gmail.com",
 			Password: "password",
 		},
 	}
-
 	for i, _ := range parents {
 		err := server.DB.Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
-			return err
+			return []models.Parent{}, err
 		}
 	}
-	return nil
+	return parents, nil
 }
 
-func refreshParentAndChildTable() error {
+func refreshUserAndPostTable() error {
 
 	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}).Error
 	if err != nil {
@@ -123,9 +130,9 @@ func refreshParentAndChildTable() error {
 	return nil
 }
 
-func seedOneParentAndOneChild() (models.Child, error) {
+func seedOneUserAndOnePost() (models.Child, error) {
 
-	err := refreshParentAndChildTable()
+	err := refreshUserAndPostTable()
 	if err != nil {
 		return models.Child{}, err
 	}
@@ -139,10 +146,9 @@ func seedOneParentAndOneChild() (models.Child, error) {
 		return models.Child{}, err
 	}
 	child := models.Child{
-		Nama: "Sam Phil Jr",
-		Email:    "sam_jr@gmail.com",
-		Password: "password",
-		ParentID: 1,
+		Nama:    "This is the nama sam",
+		Email:  "This is the email sam",
+		ParentID: parent.ID,
 	}
 	err = server.DB.Model(&models.Child{}).Create(&child).Error
 	if err != nil {
@@ -151,7 +157,7 @@ func seedOneParentAndOneChild() (models.Child, error) {
 	return child, nil
 }
 
-func seedParentsAndChilds() ([]models.Parent, []models.Child, error) {
+func seedUsersAndPosts() ([]models.Parent, []models.Child, error) {
 
 	var err error
 
@@ -188,7 +194,7 @@ func seedParentsAndChilds() ([]models.Parent, []models.Child, error) {
 	for i, _ := range parents {
 		err = server.DB.Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
-			log.Fatalf("cannot seed Parents table: %v", err)
+			log.Fatalf("cannot seed parents table: %v", err)
 		}
 		childs[i].ParentID = parents[i].ID
 
