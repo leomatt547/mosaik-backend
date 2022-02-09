@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"errors"
-	"mosaik/api/auth"
-	"mosaik/api/responses"
+	"mosaik-backend/api/auth"
+	"mosaik-backend/api/responses"
 	"net/http"
 )
 

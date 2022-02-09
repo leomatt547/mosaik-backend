@@ -1,6 +1,6 @@
 package main
 
-import "mosaik/api"
+import "mosaik-backend/api"
 
 func main() {
 	api.Run()

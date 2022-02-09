@@ -1,6 +1,6 @@
 package controllers
 
-import "mosaik/api/middlewares"
+import "mosaik-backend/api/middlewares"
 
 func (s *Server) initializeRoutes() {
 

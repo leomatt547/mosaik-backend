@@ -9,6 +9,10 @@ before_script:
   - go get -v -u github.com/jinzhu/gorm
   - go get -v -u github.com/jinzhu/gorm/dialects/postgres
   - go get -v -u github.com/rs/cors
+  - go get -v -u github.com/joho/godotenv
+  - go get -v -u github.com/dgrijalva/jwt-go
+  - go get -v -u github.com/badoux/checkmail
+  - go get -v -u golang.org/x/crypto/bcrypt
 
 stages:
   - test

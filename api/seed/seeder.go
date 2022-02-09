@@ -2,7 +2,7 @@ package seed
 
 import (
 	"log"
-	"mosaik/api/models"
+	"mosaik-backend/api/models"
 
 	"github.com/jinzhu/gorm"
 )

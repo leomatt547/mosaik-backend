@@ -4,9 +4,9 @@ import (
 	"log"
 	"testing"
 
-	"mosaik/api/models"
+	"mosaik-backend/api/models"
 
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"gopkg.in/go-playground/assert.v1"
 )
 

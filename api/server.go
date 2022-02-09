@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"mosaik/api/controllers"
-	"mosaik/api/seed"
+	"mosaik-backend/api/controllers"
+	"mosaik-backend/api/seed"
 
 	"github.com/joho/godotenv"
 )

@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"mosaik/api/auth"
-	"mosaik/api/models"
-	"mosaik/api/responses"
-	"mosaik/api/utils/formaterror"
+	"mosaik-backend/api/auth"
+	"mosaik-backend/api/models"
+	"mosaik-backend/api/responses"
+	"mosaik-backend/api/utils/formaterror"
 
 	"github.com/gorilla/mux"
 )

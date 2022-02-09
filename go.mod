@@ -1,4 +1,4 @@
-module mosaik
+module mosaik-backend
 
 go 1.17
 
@@ -9,8 +9,6 @@ require (
 	github.com/joho/godotenv v1.4.0
 	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 )
-
-require github.com/go-sql-driver/mysql v1.5.0 // indirect
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

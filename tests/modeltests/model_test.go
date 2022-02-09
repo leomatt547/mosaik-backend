@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"mosaik/api/controllers"
-	"mosaik/api/models"
+	"mosaik-backend/api/controllers"
+	"mosaik-backend/api/models"
 
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
@@ -33,16 +33,16 @@ func Database() {
 
 	TestDbDriver := os.Getenv("TestDbDriver")
 
-	if TestDbDriver == "mysql" {
-		DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("TestDbParent"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
-		server.DB, err = gorm.Open(TestDbDriver, DBURL)
-		if err != nil {
-			fmt.Printf("Cannot connect to %s database\n", TestDbDriver)
-			log.Fatal("This is the error:", err)
-		} else {
-			fmt.Printf("We are connected to the %s database\n", TestDbDriver)
-		}
-	}
+	// if TestDbDriver == "mysql" {
+	// 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", os.Getenv("TestDbParent"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
+	// 	server.DB, err = gorm.Open(TestDbDriver, DBURL)
+	// 	if err != nil {
+	// 		fmt.Printf("Cannot connect to %s database\n", TestDbDriver)
+	// 		log.Fatal("This is the error:", err)
+	// 	} else {
+	// 		fmt.Printf("We are connected to the %s database\n", TestDbDriver)
+	// 	}
+	// }
 	if TestDbDriver == "postgres" {
 		DBURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("TestDbUser"), os.Getenv("TestDbPassword"), os.Getenv("TestDbHost"), os.Getenv("TestDbPort"), os.Getenv("TestDbName"))
 		server.DB, err = gorm.Open(TestDbDriver, DBURL)
