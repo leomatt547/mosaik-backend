@@ -6,8 +6,8 @@ import (
 
 	"mosaik-backend/api/models"
 
+	"github.com/go-playground/assert/v2"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"gopkg.in/go-playground/assert.v1"
 )
 
 func TestFindAllChilds(t *testing.T) {

@@ -7,8 +7,8 @@ import (
 	"mosaik-backend/api/models"
 
 	//_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql driver
+	"github.com/go-playground/assert/v2"
 	_ "github.com/jinzhu/gorm/dialects/postgres" //postgres driver
-	"gopkg.in/go-playground/assert.v1"
 )
 
 func TestFindAllParents(t *testing.T) {

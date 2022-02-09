@@ -4,7 +4,6 @@ variables:
   REPO_NAME: gitlab.informatika.org/if3250_2022_37_alkademi/mosaik-backend
 
 before_script:
-  - RUN apt update && apt install ca-certificates libgnutls30 -y
   - go version
   - go get -v -u github.com/gorilla/mux
   - go get -v -u github.com/jinzhu/gorm
@@ -14,7 +13,7 @@ before_script:
   - go get -v -u github.com/dgrijalva/jwt-go
   - go get -v -u github.com/badoux/checkmail
   - go get -v -u golang.org/x/crypto/bcrypt
-  - go get gopkg.in/go-playground/assert.v1
+  - go get gopkg.in/go-playground/assert.v2
 
 stages:
   - test
