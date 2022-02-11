@@ -18,7 +18,7 @@ import (
 )
 
 func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
-
+	cors.EnableCors(&w)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -56,7 +56,7 @@ func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetChilds(w http.ResponseWriter, r *http.Request) {
-
+	cors.EnableCors(&w)
 	child := models.Child{}
 
 	childs, err := child.FindAllChilds(server.DB)
@@ -68,7 +68,7 @@ func (server *Server) GetChilds(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetChild(w http.ResponseWriter, r *http.Request) {
-
+	cors.EnableCors(&w)
 	vars := mux.Vars(r)
 	pid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
