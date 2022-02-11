@@ -1,0 +1,47 @@
+image: golang:1.17
+
+variables:
+  REPO_NAME: gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src
+
+before_script:
+  - go version
+  - go get -v -u github.com/gorilla/mux
+  - go get -v -u github.com/gorilla/handlers
+  - go get -v -u github.com/jinzhu/gorm
+  - go get -v -u github.com/jinzhu/gorm/dialects/postgres
+  - go get -v -u github.com/rs/cors
+  - go get -v -u github.com/joho/godotenv
+  - go get -v -u github.com/dgrijalva/jwt-go
+  - go get -v -u github.com/badoux/checkmail
+  - go get -v -u golang.org/x/crypto/bcrypt
+  - go get github.com/go-playground/assert
+
+stages:
+  - test
+  - build
+
+test model:
+  stage: test
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/src/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/src/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/tests/modeltests
+    - go test -v
+
+test controller:
+  stage: test
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/src/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/src/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/tests/controllertests
+    - go test -v
+
+build:
+  stage: build
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/src/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME
+    - go build -o mosaik-backend
