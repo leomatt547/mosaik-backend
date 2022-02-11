@@ -12,9 +12,8 @@ import (
 )
 
 var server = controllers.Server{}
-
+	
 func Run() {
-
 	var err error
 	err = godotenv.Load()
 	if err != nil {

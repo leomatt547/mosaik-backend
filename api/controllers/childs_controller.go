@@ -11,6 +11,7 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/auth"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/responses"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/cors"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/formaterror"
 
 	"github.com/gorilla/mux"
@@ -85,7 +86,7 @@ func (server *Server) GetChild(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
-
+	cors.EnableCors(&w)
 	vars := mux.Vars(r)
 
 	// Check if the child id is valid
@@ -156,7 +157,7 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) DeleteChild(w http.ResponseWriter, r *http.Request) {
-
+	cors.EnableCors(&w)
 	vars := mux.Vars(r)
 
 	// Is a valid child id given to us?

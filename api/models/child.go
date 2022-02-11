@@ -63,7 +63,6 @@ func (c *Child) Validate(action string) error {
 		if err := checkmail.ValidateFormat(c.Email); err != nil {
 			return errors.New("invalid email")
 		}
-
 		return nil
 	case "login":
 		if c.Password == "" {
