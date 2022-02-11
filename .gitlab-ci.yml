@@ -6,6 +6,7 @@ variables:
 before_script:
   - go version
   - go get -v -u github.com/gorilla/mux
+  - go get -v -u githuv.com/gorilla/handlers
   - go get -v -u github.com/jinzhu/gorm
   - go get -v -u github.com/jinzhu/gorm/dialects/postgres
   - go get -v -u github.com/rs/cors
