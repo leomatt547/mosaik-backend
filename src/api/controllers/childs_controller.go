@@ -11,14 +11,13 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/auth"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/cors"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
 
 	"github.com/gorilla/mux"
 )
 
 func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
-	cors.EnableCors(&w)
+	//cors.EnableCors(&w)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -56,7 +55,7 @@ func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetChilds(w http.ResponseWriter, r *http.Request) {
-	cors.EnableCors(&w)
+	//cors.EnableCors(&w)
 	child := models.Child{}
 
 	childs, err := child.FindAllChilds(server.DB)
@@ -68,7 +67,7 @@ func (server *Server) GetChilds(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetChild(w http.ResponseWriter, r *http.Request) {
-	cors.EnableCors(&w)
+	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
 	pid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
@@ -86,7 +85,7 @@ func (server *Server) GetChild(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
-	cors.EnableCors(&w)
+	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
 
 	// Check if the child id is valid
@@ -157,7 +156,7 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) DeleteChild(w http.ResponseWriter, r *http.Request) {
-	cors.EnableCors(&w)
+	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
 
 	// Is a valid child id given to us?
