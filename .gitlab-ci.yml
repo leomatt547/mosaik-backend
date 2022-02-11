@@ -1,4 +1,4 @@
-image: golang:1.10
+image: golang:1.17
 
 variables:
   REPO_NAME: gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src
