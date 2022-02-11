@@ -17,6 +17,7 @@ type Parent struct {
 	Nama      string    `gorm:"size:255;not null;unique" json:"nama"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
+	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
@@ -42,6 +43,7 @@ func (p *Parent) Prepare() {
 	p.ID = 0
 	p.Nama = html.EscapeString(strings.TrimSpace(p.Nama))
 	p.Email = html.EscapeString(strings.TrimSpace(p.Email))
+	p.LastLogin = time.Now()
 	p.CreatedAt = time.Now()
 	p.UpdatedAt = time.Now()
 }

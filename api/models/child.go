@@ -18,6 +18,7 @@ type Child struct {
 	Password   	string    	`gorm:"size:255;not null;" json:"password"`
 	Parent    	Parent     `json:"Parent"`
 	ParentID  	uint32    `gorm:"not null" json:"parent_id"`
+	LastLogin   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
 	CreatedAt 	time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt 	time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
@@ -44,6 +45,7 @@ func (c *Child) Prepare() {
 	c.Nama = html.EscapeString(strings.TrimSpace(c.Nama))
 	c.Email = html.EscapeString(strings.TrimSpace(c.Email))
 	c.Parent = Parent{}
+	c.LastLogin = time.Now()
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
 }
@@ -75,7 +77,6 @@ func (c *Child) Validate(action string) error {
 			return errors.New("invalid email")
 		}
 		return nil
-
 	default:
 		if c.Nama == "" {
 			return errors.New("required nama")

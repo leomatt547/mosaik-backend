@@ -29,8 +29,8 @@ var childs = []models.Child{
 		ParentID: 1,
 	},
 	{
-		Nama: "Martin Luther",
-		Email:    "luther@gmail.com",
+		Nama: "Martin Luther Jr",
+		Email:    "luther_jr@gmail.com",
 		Password: "password",
 		ParentID: 2,
 	},
