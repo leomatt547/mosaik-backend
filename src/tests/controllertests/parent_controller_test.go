@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-playground/assert/v2"
 	"github.com/gorilla/mux"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 )
 
 func TestCreateParent(t *testing.T) {

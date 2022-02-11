@@ -3,8 +3,8 @@ package controllers
 import (
 	"net/http"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/responses"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/cors"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/cors"
 )
 
 func (server *Server) Home(w http.ResponseWriter, r *http.Request) {

@@ -6,8 +6,8 @@ import (
 	"os"
 	"testing"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/controllers"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/controllers"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"

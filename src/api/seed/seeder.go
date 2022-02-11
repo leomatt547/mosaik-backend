@@ -3,7 +3,7 @@ package seed
 import (
 	"log"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 
 	"github.com/jinzhu/gorm"
 )

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/auth"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/responses"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/cors"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/auth"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/cors"
 )
 
 func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {

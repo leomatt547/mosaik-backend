@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/auth"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/models"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/responses"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/cors"
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/formaterror"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/auth"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/cors"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
 
 	"github.com/gorilla/mux"
 )

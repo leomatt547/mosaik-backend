@@ -1,4 +1,4 @@
-module gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend
+module gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src
 
 go 1.17
 
@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.4.0
-	golang.org/x/crypto v0.0.0-20220208233918-bba287dce954
+	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2
 )
 
 require (

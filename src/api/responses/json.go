@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/api/utils/cors"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/cors"
 )
 
 func JSON(w http.ResponseWriter, statusCode int, data interface{}) {
