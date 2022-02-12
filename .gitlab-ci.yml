@@ -25,7 +25,7 @@ test model:
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
-    - mv $CI_PROJECT_DIR/src/* $GOPATH/src/$REPO_NAME/src
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests
     - go test -v
 
@@ -34,7 +34,7 @@ test controller:
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
-    - mv $CI_PROJECT_DIR/src/* $GOPATH/src/$REPO_NAME/src
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests
     - go test -v
 
