@@ -1,5 +1,6 @@
 module gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend
 
+// +heroku goVersion go1.17
 go 1.17
 
 require (
