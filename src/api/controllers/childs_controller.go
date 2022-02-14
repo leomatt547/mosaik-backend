@@ -35,7 +35,7 @@ func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	uid, err := auth.ExtractTokenID(r)
+	uid, err := auth.ExtractTokenParentID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
@@ -95,8 +95,8 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//CHeck if the auth token is valid and  get the user id from it
-	uid, err := auth.ExtractTokenID(r)
+	//Check if the auth token is valid and  get the user id from it
+	uid, err := auth.ExtractTokenParentID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
@@ -167,7 +167,7 @@ func (server *Server) DeleteChild(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Is this user authenticated?
-	uid, err := auth.ExtractTokenID(r)
+	uid, err := auth.ExtractTokenParentID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
