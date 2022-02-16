@@ -13,14 +13,22 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func CreateToken(parent_id uint32) (string, error) {
+func CreateTokenParent(parent_id uint32) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["parent_id"] = parent_id
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expired setelah 1 jam
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
+}
 
+func CreateTokenChild(child_id uint32) (string, error) {
+	claims := jwt.MapClaims{}
+	claims["authorized"] = true
+	claims["child_id"] = child_id
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expired setelah 1 jam
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 }
 
 func TokenValid(r *http.Request) error {
@@ -40,6 +48,7 @@ func TokenValid(r *http.Request) error {
 	return nil
 }
 
+//Extract Token dari Cookie
 func ExtractToken(r *http.Request) string {
 	keys := r.URL.Query()
 	token := keys.Get("token")
@@ -53,12 +62,11 @@ func ExtractToken(r *http.Request) string {
 	return ""
 }
 
-func ExtractTokenID(r *http.Request) (uint32, error) {
-
+func ExtractTokenParentID(r *http.Request) (uint32, error) {
 	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method parent: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("API_SECRET")), nil
 	})
@@ -76,6 +84,28 @@ func ExtractTokenID(r *http.Request) (uint32, error) {
 	return 0, nil
 }
 
+func ExtractTokenChildID(r *http.Request) (uint32, error) {
+	tokenString := ExtractToken(r)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method for child: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("API_SECRET")), nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["child_id"]), 10, 32)
+		if err != nil {
+			return 0, err
+		}
+		return uint32(uid), nil
+	}
+	return 0, nil
+}
+
 //Pretty display the claims licely in the terminal
 func Pretty(data interface{}) {
 	b, err := json.MarshalIndent(data, "", " ")
@@ -83,6 +113,5 @@ func Pretty(data interface{}) {
 		log.Println(err)
 		return
 	}
-
 	fmt.Println(string(b))
 }
