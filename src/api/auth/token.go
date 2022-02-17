@@ -22,7 +22,7 @@ func CreateTokenParent(parent_id uint32) (string, error) {
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
 }
 
-func CreateTokenChild(child_id uint32) (string, error) {
+func CreateTokenChild(child_id uint64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["child_id"] = child_id
@@ -84,7 +84,7 @@ func ExtractTokenParentID(r *http.Request) (uint32, error) {
 	return 0, nil
 }
 
-func ExtractTokenChildID(r *http.Request) (uint32, error) {
+func ExtractTokenChildID(r *http.Request) (uint64, error) {
 	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -97,11 +97,11 @@ func ExtractTokenChildID(r *http.Request) (uint32, error) {
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["child_id"]), 10, 32)
+		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["child_id"]), 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return uint32(uid), nil
+		return uint64(uid), nil
 	}
 	return 0, nil
 }
