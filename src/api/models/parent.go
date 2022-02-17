@@ -63,7 +63,6 @@ func (p *Parent) Validate(action string) error {
 		if err := checkmail.ValidateFormat(p.Email); err != nil {
 			return errors.New("invalid email")
 		}
-
 		return nil
 	case "login":
 		if p.Password == "" {
@@ -95,8 +94,7 @@ func (p *Parent) Validate(action string) error {
 }
 
 func (p *Parent) SaveParent(db *gorm.DB) (*Parent, error) {
-	var err error
-	err = db.Debug().Create(&p).Error
+	err := db.Debug().Create(&p).Error
 	if err != nil {
 		return &Parent{}, err
 	}
@@ -104,9 +102,8 @@ func (p *Parent) SaveParent(db *gorm.DB) (*Parent, error) {
 }
 
 func (p *Parent) FindAllParents(db *gorm.DB) (*[]Parent, error) {
-	var err error
 	parents := []Parent{}
-	err = db.Debug().Model(&Parent{}).Limit(100).Find(&parents).Error
+	err := db.Debug().Model(&Parent{}).Limit(100).Find(&parents).Error
 	if err != nil {
 		return &[]Parent{}, err
 	}
@@ -114,8 +111,7 @@ func (p *Parent) FindAllParents(db *gorm.DB) (*[]Parent, error) {
 }
 
 func (p *Parent) FindParentByID(db *gorm.DB, uid uint32) (*Parent, error) {
-	var err error
-	err = db.Debug().Model(Parent{}).Where("id = ?", uid).Take(&p).Error
+	err := db.Debug().Model(Parent{}).Where("id = ?", uid).Take(&p).Error
 	if err != nil {
 		return &Parent{}, err
 	}
@@ -133,9 +129,9 @@ func (p *Parent) UpdateAParent(db *gorm.DB, uid uint32) (*Parent, error) {
 	}
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
-			"password":  p.Password,
-			"nama":  p.Nama,
-			"email":     p.Email,
+			"password":   p.Password,
+			"nama":       p.Nama,
+			"email":      p.Email,
 			"updated_at": time.Now(),
 		},
 	)
