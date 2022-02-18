@@ -147,7 +147,6 @@ func seedOneChildVisit() (models.ChildVisit, error) {
 }
 
 func seedParents() error {
-
 	parents := []models.Parent{
 		{
 			Nama:     "Steven victor",
@@ -171,7 +170,6 @@ func seedParents() error {
 }
 
 func seedOneParentAndOneChild() (models.Child, error) {
-
 	err := refreshParentAndChildTable()
 	if err != nil {
 		return models.Child{}, err
@@ -199,9 +197,7 @@ func seedOneParentAndOneChild() (models.Child, error) {
 }
 
 func seedParentsAndChilds() ([]models.Parent, []models.Child, error) {
-
 	var err error
-
 	if err != nil {
 		return []models.Parent{}, []models.Child{}, err
 	}
