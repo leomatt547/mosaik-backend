@@ -110,16 +110,14 @@ func (cv *ChildVisit) FindChildVisitsbyChildID(db *gorm.DB, cid uint64) (*[]Chil
 	if len(childvisits) > 0 {
 		//Dapatkan id Child
 		for i, _ := range childvisits {
-			err := db.Debug().Model(&Child{}).Where("id = ?", childvisits[i].ChildID).Take(&childvisits[i].Child).Error
+			err := db.Debug().Model(&Child{}).Where("id = ?", cid).Take(&childvisits[i].Child).Error
 			if err != nil {
 				return &[]ChildVisit{}, err
 			}
 			//Dapatkan id Url
-			for j, _ := range childvisits {
-				err := db.Debug().Model(&Url{}).Where("id = ?", childvisits[j].UrlID).Take(&childvisits[j].Url).Error
-				if err != nil {
-					return &[]ChildVisit{}, err
-				}
+			err = db.Debug().Model(&Url{}).Where("id = ?", childvisits[i].UrlID).Take(&childvisits[i].Url).Error
+			if err != nil {
+				return &[]ChildVisit{}, err
 			}
 		}
 	}

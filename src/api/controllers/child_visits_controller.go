@@ -62,32 +62,29 @@ func (server *Server) CreateChildVisit(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) GetChildVisits(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
-	childvisit := models.ChildVisit{}
-
-	childs, err := childvisit.FindAllChildVisits(server.DB)
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return
-	}
-	responses.JSON(w, http.StatusOK, childs)
-}
-
-func (server *Server) GetChildVisitsbyChildID(w http.ResponseWriter, r *http.Request) {
-	//cors.EnableCors(&w)
-	vars := r.URL.Query().Get("id")
+	vars := r.URL.Query().Get("child_id")
 	cid, err := strconv.ParseUint(vars, 10, 64)
 	if err != nil {
-		responses.ERROR(w, http.StatusBadRequest, err)
-		return
-	}
-	childvisit := models.ChildVisit{}
+		//minta seluruhnya
+		childvisit := models.ChildVisit{}
 
-	childs, err := childvisit.FindChildVisitsbyChildID(server.DB, cid)
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return
+		childs, err := childvisit.FindAllChildVisits(server.DB)
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
+		responses.JSON(w, http.StatusOK, childs)
+	} else {
+		//query child_id diterima
+		childvisit := models.ChildVisit{}
+
+		childs, err := childvisit.FindChildVisitsbyChildID(server.DB, cid)
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
+		responses.JSON(w, http.StatusOK, childs)
 	}
-	responses.JSON(w, http.StatusOK, childs)
 }
 
 func (server *Server) GetChildVisit(w http.ResponseWriter, r *http.Request) {

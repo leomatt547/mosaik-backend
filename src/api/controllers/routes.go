@@ -27,7 +27,6 @@ func (s *Server) initializeRoutes() {
 	//Child Visit routes
 	s.Router.HandleFunc("/childvisits", middlewares.SetMiddlewareJSON(s.CreateChildVisit)).Methods("POST")
 	s.Router.HandleFunc("/childvisits", middlewares.SetMiddlewareJSON(s.GetChildVisits)).Methods("GET")
-	s.Router.HandleFunc("/childvisits", middlewares.SetMiddlewareJSON(s.GetChildVisitsbyChildID)).Methods("GET")
 	s.Router.HandleFunc("/childvisits/{id}", middlewares.SetMiddlewareJSON(s.GetChildVisit)).Methods("GET")
 	s.Router.HandleFunc("/childvisits/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteChildVisit)).Methods("DELETE")
 
