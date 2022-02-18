@@ -72,6 +72,24 @@ func (server *Server) GetChildVisits(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, childs)
 }
 
+func (server *Server) GetChildVisitsbyChildID(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	vars := r.URL.Query().Get("id")
+	cid, err := strconv.ParseUint(vars, 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	childvisit := models.ChildVisit{}
+
+	childs, err := childvisit.FindChildVisitsbyChildID(server.DB, cid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, childs)
+}
+
 func (server *Server) GetChildVisit(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
