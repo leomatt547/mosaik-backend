@@ -30,6 +30,12 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/childvisits/{id}", middlewares.SetMiddlewareJSON(s.GetChildVisit)).Methods("GET")
 	s.Router.HandleFunc("/childvisits/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteChildVisit)).Methods("DELETE")
 
+	//Parent Visit routes
+	s.Router.HandleFunc("/parentvisits", middlewares.SetMiddlewareJSON(s.CreateParentVisit)).Methods("POST")
+	s.Router.HandleFunc("/parentvisits", middlewares.SetMiddlewareJSON(s.GetParentVisits)).Methods("GET")
+	s.Router.HandleFunc("/parentvisits/{id}", middlewares.SetMiddlewareJSON(s.GetParentVisit)).Methods("GET")
+	s.Router.HandleFunc("/parentvisits/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteParentVisit)).Methods("DELETE")
+
 	//Url routes
 	s.Router.HandleFunc("/urls", middlewares.SetMiddlewareJSON(s.CreateUrl)).Methods("POST")
 	s.Router.HandleFunc("/urls", middlewares.SetMiddlewareJSON(s.GetUrls)).Methods("GET")

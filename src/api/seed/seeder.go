@@ -60,12 +60,25 @@ var childvisits = []models.ChildVisit{
 	},
 }
 
+var parentvisits = []models.ParentVisit{
+	{
+		UrlID:    2,
+		Duration: 7,
+		ParentID: 1,
+	},
+	{
+		UrlID:    1,
+		Duration: 11,
+		ParentID: 2,
+	},
+}
+
 func Load(db *gorm.DB) {
-	err := db.Debug().DropTableIfExists(&models.Child{}, &models.Parent{}, &models.Url{}, &models.ChildVisit{}).Error
+	err := db.Debug().DropTableIfExists(&models.Child{}, &models.Parent{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v", err)
 	}
-	err = db.Debug().AutoMigrate(&models.Parent{}, &models.Child{}, &models.Url{}, &models.ChildVisit{}).Error
+	err = db.Debug().AutoMigrate(&models.Parent{}, &models.Child{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}).Error
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v", err)
 	}
@@ -82,6 +95,11 @@ func Load(db *gorm.DB) {
 	}
 
 	err = db.Debug().Model(&models.ChildVisit{}).AddForeignKey("url_id", "urls(id)", "cascade", "cascade").Error
+	if err != nil {
+		log.Fatalf("attaching foreign key url error: %v", err)
+	}
+
+	err = db.Debug().Model(&models.ParentVisit{}).AddForeignKey("url_id", "urls(id)", "cascade", "cascade").Error
 	if err != nil {
 		log.Fatalf("attaching foreign key url error: %v", err)
 	}
@@ -109,6 +127,12 @@ func Load(db *gorm.DB) {
 		err = db.Debug().Model(&models.ChildVisit{}).Create(&childvisits[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed Child Visits table: %v", err)
+		}
+
+		parentvisits[i].UrlID = urls[i].ID
+		err = db.Debug().Model(&models.ParentVisit{}).Create(&parentvisits[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed Parent Visits table: %v", err)
 		}
 	}
 }

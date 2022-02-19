@@ -126,11 +126,11 @@ func refreshUrlTable() error {
 }
 
 func refreshAllTable() error {
-	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}).Error
+	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
 	if err != nil {
 		return err
 	}
-	err = server.DB.AutoMigrate(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}).Error
+	err = server.DB.AutoMigrate(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
 	if err != nil {
 		return err
 	}
@@ -214,6 +214,48 @@ func seedChildVisitsAndUrls() ([]models.ChildVisit, []models.Url, error) {
 	return childvisits, urls, nil
 }
 
+func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
+	var err error
+	if err != nil {
+		return []models.ParentVisit{}, []models.Url{}, err
+	}
+	var urls = []models.Url{
+		{
+			Url:   "www.google.com",
+			Title: "Google",
+		},
+		{
+			Url:   "www.facebook.com",
+			Title: "Facebook",
+		},
+	}
+	var parentvisits = []models.ParentVisit{
+		{
+			UrlID:    1,
+			Duration: 5,
+			ParentID: 1,
+		},
+		{
+			UrlID:    2,
+			Duration: 10,
+			ParentID: 2,
+		},
+	}
+	for i, _ := range urls {
+		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed urls table: %v", err)
+		}
+
+		parentvisits[i].UrlID = urls[i].ID
+		err = server.DB.Model(&models.ParentVisit{}).Create(&parentvisits[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed Parent Visits table: %v", err)
+		}
+	}
+	return parentvisits, urls, nil
+}
+
 func seedOneChildVisit() (models.ChildVisit, error) {
 	var childvisits = models.ChildVisit{
 		ID:       1,
@@ -227,6 +269,21 @@ func seedOneChildVisit() (models.ChildVisit, error) {
 		log.Fatalf("cannot seed Child Visit table: %v", err)
 	}
 	return childvisits, nil
+}
+
+func seedOneParentVisit() (models.ParentVisit, error) {
+	var parentvisits = models.ParentVisit{
+		ID:       1,
+		UrlID:    1,
+		Duration: 5,
+		ParentID: 1,
+	}
+
+	err := server.DB.Model(&models.ParentVisit{}).Create(&parentvisits).Error
+	if err != nil {
+		log.Fatalf("cannot seed Parent Visit table: %v", err)
+	}
+	return parentvisits, nil
 }
 
 func seedOneParentAndOneChild() (models.Child, error) {
