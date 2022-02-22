@@ -20,43 +20,78 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := models.User{}
-	err = json.Unmarshal(body, &user)
+	parent := models.Parent{}
+	child := models.Child{}
+
+	err = json.Unmarshal(body, &parent)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	user.Prepare()
-	err = user.Validate("login")
+	err = json.Unmarshal(body, &child)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	token, err := server.SignIn(user.Email, user.Password)
+	parent.Prepare()
+	err = parent.Validate("login")
 	if err != nil {
-		formattedError := formaterror.FormatError(err.Error())
-		responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
+	}
+
+	child.Prepare()
+	err = child.Validate("login")
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	token, err := server.ParentSignIn(parent.Email, parent.Password)
+	if err != nil {
+		token, err := server.ChildSignIn(child.Email, child.Password)
+		if err != nil {
+			formattedError := formaterror.FormatError(err.Error())
+			responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+			return
+		}
+		responses.JSON(w, http.StatusOK, token)
 	}
 	responses.JSON(w, http.StatusOK, token)
 }
 
-func (server *Server) SignIn(email, password string) (string, error) {
+func (server *Server) ParentSignIn(email, password string) (string, error) {
 	var err error
 
-	user := models.User{}
+	parent := models.Parent{}
 
-	err = server.DB.Debug().Model(models.User{}).Where("email = ?", email).Take(&user).Error
+	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", email).Take(&parent).Error
 	if err != nil {
 		return "", err
 	}
 
-	err = models.VerifyPassword(user.Password, password)
+	err = models.VerifyPassword(parent.Password, password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}
+	return auth.CreateTokenParent(uint32(parent.ID))
+}
 
-	return auth.CreateToken(user)
+func (server *Server) ChildSignIn(email, password string) (string, error) {
+	var err error
+
+	child := models.Child{}
+
+	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", email).Take(&child).Error
+	if err != nil {
+		return "", err
+	}
+
+	err = models.VerifyPassword(child.Password, password)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return "", err
+	}
+	return auth.CreateTokenChild(uint32(child.ID))
 }
