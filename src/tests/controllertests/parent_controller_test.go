@@ -24,14 +24,14 @@ func TestCreateParent(t *testing.T) {
 	samples := []struct {
 		inputJSON    string
 		statusCode   int
-		nama     string
+		nama         string
 		email        string
 		errorMessage string
 	}{
 		{
 			inputJSON:    `{"nama":"Pet", "email": "pet@gmail.com", "password": "password"}`,
 			statusCode:   201,
-			nama:     "Pet",
+			nama:         "Pet",
 			email:        "pet@gmail.com",
 			errorMessage: "",
 		},
@@ -133,14 +133,14 @@ func TestGetParentByID(t *testing.T) {
 	parentSample := []struct {
 		id           string
 		statusCode   int
-		nama     string
+		nama         string
 		email        string
 		errorMessage string
 	}{
 		{
 			id:         strconv.Itoa(int(parent.ID)),
 			statusCode: 200,
-			nama:   parent.Nama,
+			nama:       parent.Nama,
 			email:      parent.Email,
 		},
 		{

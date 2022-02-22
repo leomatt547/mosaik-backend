@@ -95,7 +95,7 @@ func (server *Server) UpdateParent(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	tokenID, err := auth.ExtractTokenID(r)
+	tokenID, err := auth.ExtractTokenParentID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
@@ -130,7 +130,7 @@ func (server *Server) DeleteParent(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	tokenID, err := auth.ExtractTokenID(r)
+	tokenID, err := auth.ExtractTokenParentID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return

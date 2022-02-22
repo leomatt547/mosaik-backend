@@ -42,8 +42,8 @@ func TestSaveChild(t *testing.T) {
 
 	newChild := models.Child{
 		ID:       1,
-		Nama:    "This is the nama",
-		Email:  "This is the email",
+		Nama:     "This is the nama",
+		Email:    "This is the email",
 		ParentID: parent.ID,
 	}
 	savedChild, err := newChild.SaveChild(server.DB)
@@ -90,13 +90,13 @@ func TestUpdateAChild(t *testing.T) {
 	}
 	childUpdate := models.Child{
 		ID:       1,
-		Nama:    "modiUpdate",
-		Email:  "modiupdate@gmail.com",
+		Nama:     "modiUpdate",
+		Email:    "modiupdate@gmail.com",
 		ParentID: child.ParentID,
 	}
-	updatedChild, err := childUpdate.UpdateAChild(server.DB)
+	updatedChild, err := childUpdate.UpdateAChild(server.DB, childUpdate.ID)
 	if err != nil {
-		t.Errorf("this is the error updating the parent: %v\n", err)
+		t.Errorf("this is the error updating the child: %v\n", err)
 		return
 	}
 	assert.Equal(t, updatedChild.ID, childUpdate.ID)
