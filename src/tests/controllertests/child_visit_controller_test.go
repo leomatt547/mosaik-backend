@@ -122,9 +122,8 @@ import (
 // 	}
 // }
 
-func TestGetChilds(t *testing.T) {
-
-	err := refreshParentAndChildTable()
+func TestGetChildVisits(t *testing.T) {
+	err := refreshAllTable()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -132,24 +131,27 @@ func TestGetChilds(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_, _, err = seedChildVisitsAndUrls()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	req, err := http.NewRequest("GET", "/childs", nil)
+	req, err := http.NewRequest("GET", "/childvisits", nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(server.GetChilds)
+	handler := http.HandlerFunc(server.GetChildVisits)
 	handler.ServeHTTP(rr, req)
 
-	var childs []models.Child
-	_ = json.Unmarshal(rr.Body.Bytes(), &childs)
+	var childvisits []models.ChildVisit
+	_ = json.Unmarshal(rr.Body.Bytes(), &childvisits)
 
 	assert.Equal(t, rr.Code, http.StatusOK)
-	assert.Equal(t, len(childs), 2)
+	assert.Equal(t, len(childvisits), 2)
 }
-func TestGetChildByID(t *testing.T) {
-
-	err := refreshParentAndChildTable()
+func TestGetChildVisitByID(t *testing.T) {
+	err := refreshAllTable()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -157,36 +159,48 @@ func TestGetChildByID(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	childSample := []struct {
+	url, err := seedOneUrl()
+	if err != nil {
+		log.Fatal(err)
+	}
+	childVisit, err := seedOneChildVisit()
+	if err != nil {
+		log.Fatal(err)
+	}
+	childVisit.Child = child
+	childVisit.ChildID = child.ID
+	childVisit.Url = url
+	childVisit.UrlID = url.ID
+	childVisitSample := []struct {
 		id           string
 		statusCode   int
-		nama         string
-		email        string
-		parent_id    uint32
+		url_id       int
+		duration     int
+		child_id     int
 		errorMessage string
 	}{
 		{
-			id:         strconv.Itoa(int(child.ID)),
+			id:         strconv.Itoa(int(childVisit.ID)),
 			statusCode: 200,
-			nama:       child.Nama,
-			email:      child.Email,
-			parent_id:  child.ParentID,
+			url_id:     int(childVisit.UrlID),
+			duration:   int(childVisit.Duration),
+			child_id:   int(childVisit.ChildID),
 		},
 		{
 			id:         "unknwon",
 			statusCode: 400,
 		},
 	}
-	for _, v := range childSample {
+	for _, v := range childVisitSample {
 
-		req, err := http.NewRequest("GET", "/childs", nil)
+		req, err := http.NewRequest("GET", "/childvisits", nil)
 		if err != nil {
 			t.Errorf("this is the error: %v\n", err)
 		}
 		req = mux.SetURLVars(req, map[string]string{"id": v.id})
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(server.GetChild)
+		handler := http.HandlerFunc(server.GetChildVisit)
 		handler.ServeHTTP(rr, req)
 
 		responseMap := make(map[string]interface{})
@@ -197,9 +211,10 @@ func TestGetChildByID(t *testing.T) {
 		assert.Equal(t, rr.Code, v.statusCode)
 
 		if v.statusCode == 200 {
-			assert.Equal(t, child.Nama, responseMap["nama"])
-			assert.Equal(t, child.Email, responseMap["email"])
-			assert.Equal(t, float64(child.ParentID), responseMap["parent_id"]) //the response author id is float64
+			assert.Equal(t, float64(childVisit.ID), responseMap["id"])
+			assert.Equal(t, float64(childVisit.UrlID), responseMap["url_id"]) //the response url id is float64
+			assert.Equal(t, float64(childVisit.Duration), responseMap["duration"])
+			assert.Equal(t, float64(childVisit.ChildID), responseMap["child_id"]) //the response child id is float64
 		}
 	}
 }
@@ -214,7 +229,7 @@ func TestGetChildByID(t *testing.T) {
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
-// 	parents, childs, err := seedParentsAndChilds()
+// 	parents, childvisits, err := seedParentsAndChilds()
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}

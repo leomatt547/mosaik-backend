@@ -13,9 +13,9 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 )
 
-// func TestCreateChild(t *testing.T) {
+// func TestCreateParent(t *testing.T) {
 
-// 	err := refreshParentAndChildTable()
+// 	err := refreshParentAndParentTable()
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
@@ -95,12 +95,12 @@ import (
 // 	}
 // 	for _, v := range samples {
 
-// 		req, err := http.NewRequest("POST", "/childs", bytes.NewBufferString(v.inputJSON))
+// 		req, err := http.NewRequest("POST", "/parents", bytes.NewBufferString(v.inputJSON))
 // 		if err != nil {
 // 			t.Errorf("this is the error: %v\n", err)
 // 		}
 // 		rr := httptest.NewRecorder()
-// 		handler := http.HandlerFunc(server.CreateChild)
+// 		handler := http.HandlerFunc(server.CreateParent)
 
 // 		req.Header.Set("Authorization", v.tokenGiven)
 // 		handler.ServeHTTP(rr, req)
@@ -122,71 +122,85 @@ import (
 // 	}
 // }
 
-func TestGetChilds(t *testing.T) {
-
-	err := refreshParentAndChildTable()
+func TestGetParentVisits(t *testing.T) {
+	err := refreshAllTable()
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, _, err = seedParentsAndChilds()
+	_, err = seedParents()
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, _, err = seedParentVisitsAndUrls()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	req, err := http.NewRequest("GET", "/childs", nil)
+	req, err := http.NewRequest("GET", "/parentvisits", nil)
 	if err != nil {
 		t.Errorf("this is the error: %v\n", err)
 	}
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(server.GetChilds)
+	handler := http.HandlerFunc(server.GetParentVisits)
 	handler.ServeHTTP(rr, req)
 
-	var childs []models.Child
-	_ = json.Unmarshal(rr.Body.Bytes(), &childs)
+	var parentvisits []models.ParentVisit
+	_ = json.Unmarshal(rr.Body.Bytes(), &parentvisits)
 
 	assert.Equal(t, rr.Code, http.StatusOK)
-	assert.Equal(t, len(childs), 2)
+	assert.Equal(t, len(parentvisits), 2)
 }
-func TestGetChildByID(t *testing.T) {
-
-	err := refreshParentAndChildTable()
+func TestGetParentVisitByID(t *testing.T) {
+	err := refreshAllTable()
 	if err != nil {
 		log.Fatal(err)
 	}
-	child, err := seedOneParentAndOneChild()
+	parent, err := seedOneParent()
 	if err != nil {
 		log.Fatal(err)
 	}
-	childSample := []struct {
+	url, err := seedOneUrl()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parentVisit, err := seedOneParentVisit()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parentVisit.Parent = parent
+	parentVisit.ParentID = parent.ID
+	parentVisit.Url = url
+	parentVisit.UrlID = url.ID
+	parentVisitSample := []struct {
 		id           string
 		statusCode   int
-		nama         string
-		email        string
-		parent_id    uint32
+		url_id       int
+		duration     int
+		parent_id    int
 		errorMessage string
 	}{
 		{
-			id:         strconv.Itoa(int(child.ID)),
+			id:         strconv.Itoa(int(parentVisit.ID)),
 			statusCode: 200,
-			nama:       child.Nama,
-			email:      child.Email,
-			parent_id:  child.ParentID,
+			url_id:     int(parentVisit.UrlID),
+			duration:   int(parentVisit.Duration),
+			parent_id:  int(parentVisit.ParentID),
 		},
 		{
-			id:         "unknwon",
+			id:         "unknown",
 			statusCode: 400,
 		},
 	}
-	for _, v := range childSample {
+	for _, v := range parentVisitSample {
 
-		req, err := http.NewRequest("GET", "/childs", nil)
+		req, err := http.NewRequest("GET", "/parentvisits", nil)
 		if err != nil {
 			t.Errorf("this is the error: %v\n", err)
 		}
 		req = mux.SetURLVars(req, map[string]string{"id": v.id})
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(server.GetChild)
+		handler := http.HandlerFunc(server.GetParentVisit)
 		handler.ServeHTTP(rr, req)
 
 		responseMap := make(map[string]interface{})
@@ -197,24 +211,25 @@ func TestGetChildByID(t *testing.T) {
 		assert.Equal(t, rr.Code, v.statusCode)
 
 		if v.statusCode == 200 {
-			assert.Equal(t, child.Nama, responseMap["nama"])
-			assert.Equal(t, child.Email, responseMap["email"])
-			assert.Equal(t, float64(child.ParentID), responseMap["parent_id"]) //the response author id is float64
+			assert.Equal(t, float64(parentVisit.ID), responseMap["id"])
+			assert.Equal(t, float64(parentVisit.UrlID), responseMap["url_id"]) //the response url id is float64
+			assert.Equal(t, float64(parentVisit.Duration), responseMap["duration"])
+			assert.Equal(t, float64(parentVisit.ParentID), responseMap["parent_id"]) //the response parent id is float64
 		}
 	}
 }
 
-// func TestUpdateChild(t *testing.T) {
+// func TestUpdateParent(t *testing.T) {
 
-// 	var ChildParentEmail, ChildParentPassword string
-// 	var AuthChildParentID uint32
-// 	var AuthChildID uint64
+// 	var ParentParentEmail, ParentParentPassword string
+// 	var AuthParentParentID uint32
+// 	var AuthParentID uint64
 
-// 	err := refreshParentAndChildTable()
+// 	err := refreshParentAndParentTable()
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
-// 	parents, childs, err := seedParentsAndChilds()
+// 	parents, parentvisits, err := seedParents()
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
@@ -223,25 +238,25 @@ func TestGetChildByID(t *testing.T) {
 // 		if parent.ID == 2 {
 // 			continue
 // 		}
-// 		ChildParentEmail = parent.Email
-// 		ChildParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
+// 		ParentParentEmail = parent.Email
+// 		ParentParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 // 	}
 // 	//Login the parent and get the authentication token
-// 	token, err := server.SignIn(ChildParentEmail, ChildParentPassword)
+// 	token, err := server.SignIn(ParentParentEmail, ParentParentPassword)
 // 	if err != nil {
 // 		log.Fatalf("cannot login: %v\n", err)
 // 	}
 // 	tokenString := fmt.Sprintf("Bearer %v", token)
 
-// 	// Get only the first child
-// 	for _, child := range childs {
-// 		if child.ID == 2 {
+// 	// Get only the first parent
+// 	for _, parent := range parents {
+// 		if parent.ID == 2 {
 // 			continue
 // 		}
-// 		AuthChildID = child.ID
-// 		AuthChildParentID = child.ParentID
+// 		AuthParentID = parent.ID
+// 		AuthParentParentID = parent.ParentID
 // 	}
-// 	// fmt.Printf("this is the auth child: %v\n", AuthChildID)
+// 	// fmt.Printf("this is the auth parent: %v\n", AuthParentID)
 
 // 	samples := []struct {
 // 		id           string
@@ -255,18 +270,18 @@ func TestGetChildByID(t *testing.T) {
 // 	}{
 // 		{
 // 			// Convert int64 to int first before converting to string
-// 			id:           strconv.Itoa(int(AuthChildID)),
-// 			updateJSON:   `{"nama":"The updated child", "email": "This is the updated email", "parent_id": 1}`,
+// 			id:           strconv.Itoa(int(AuthParentID)),
+// 			updateJSON:   `{"nama":"The updated parent", "email": "This is the updated email", "parent_id": 1}`,
 // 			statusCode:   200,
-// 			nama:        "The updated child",
+// 			nama:        "The updated parent",
 // 			email:      "This is the updated email",
-// 			parent_id:    AuthChildParentID,
+// 			parent_id:    AuthParentParentID,
 // 			tokenGiven:   tokenString,
 // 			errorMessage: "",
 // 		},
 // 		{
 // 			// When no token is provided
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"This is still another nama", "email": "This is the updated email", "parent_id": 1}`,
 // 			tokenGiven:   "",
 // 			statusCode:   401,
@@ -274,36 +289,36 @@ func TestGetChildByID(t *testing.T) {
 // 		},
 // 		{
 // 			// When incorrect token is provided
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"This is still another nama", "email": "This is the updated email", "parent_id": 1}`,
 // 			tokenGiven:   "this is an incorrect token",
 // 			statusCode:   401,
 // 			errorMessage: "Unauthorized",
 // 		},
 // 		{
-// 			//Note: "Nama 2" belongs to child 2, and nama must be unique
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			//Note: "Nama 2" belongs to parent 2, and nama must be unique
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"Nama 2", "email": "This is the updated email", "parent_id": 1}`,
 // 			statusCode:   500,
 // 			tokenGiven:   tokenString,
 // 			errorMessage: "Nama Already Taken",
 // 		},
 // 		{
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"", "email": "This is the updated email", "parent_id": 1}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
 // 			errorMessage: "Required Nama",
 // 		},
 // 		{
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"Awesome nama", "email": "", "parent_id": 1}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
 // 			errorMessage: "Required Email",
 // 		},
 // 		{
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"This is another nama", "email": "This is the updated email"}`,
 // 			statusCode:   401,
 // 			tokenGiven:   tokenString,
@@ -314,7 +329,7 @@ func TestGetChildByID(t *testing.T) {
 // 			statusCode: 400,
 // 		},
 // 		{
-// 			id:           strconv.Itoa(int(AuthChildID)),
+// 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"This is still another nama", "email": "This is the updated email", "parent_id": 2}`,
 // 			tokenGiven:   tokenString,
 // 			statusCode:   401,
@@ -324,13 +339,13 @@ func TestGetChildByID(t *testing.T) {
 
 // 	for _, v := range samples {
 
-// 		req, err := http.NewRequest("POST", "/childs", bytes.NewBufferString(v.updateJSON))
+// 		req, err := http.NewRequest("POST", "/parents", bytes.NewBufferString(v.updateJSON))
 // 		if err != nil {
 // 			t.Errorf("this is the error: %v\n", err)
 // 		}
 // 		req = mux.SetURLVars(req, map[string]string{"id": v.id})
 // 		rr := httptest.NewRecorder()
-// 		handler := http.HandlerFunc(server.UpdateChild)
+// 		handler := http.HandlerFunc(server.UpdateParent)
 
 // 		req.Header.Set("Authorization", v.tokenGiven)
 
@@ -353,17 +368,17 @@ func TestGetChildByID(t *testing.T) {
 // 	}
 // }
 
-// func TestDeleteChild(t *testing.T) {
+// func TestDeleteParent(t *testing.T) {
 
-// 	var ChildParentEmail, ChildParentPassword string
-// 	var ChildParentID uint32
-// 	var AuthChildID uint64
+// 	var ParentParentEmail, ParentParentPassword string
+// 	var ParentParentID uint32
+// 	var AuthParentID uint64
 
-// 	err := refreshParentAndChildTable()
+// 	err := refreshParentAndParentTable()
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
-// 	parents, childs, err := seedParentsAndChilds()
+// 	parents, parents, err := seedParents()
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
@@ -372,25 +387,25 @@ func TestGetChildByID(t *testing.T) {
 // 		if parent.ID == 1 {
 // 			continue
 // 		}
-// 		ChildParentEmail = parent.Email
-// 		ChildParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
+// 		ParentParentEmail = parent.Email
+// 		ParentParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 // 	}
 // 	//Login the parent and get the authentication token
-// 	token, err := server.SignIn(ChildParentEmail, ChildParentPassword)
+// 	token, err := server.SignIn(ParentParentEmail, ParentParentPassword)
 // 	if err != nil {
 // 		log.Fatalf("cannot login: %v\n", err)
 // 	}
 // 	tokenString := fmt.Sprintf("Bearer %v", token)
 
-// 	// Get only the second child
-// 	for _, child := range childs {
-// 		if child.ID == 1 {
+// 	// Get only the second parent
+// 	for _, parent := range parents {
+// 		if parent.ID == 1 {
 // 			continue
 // 		}
-// 		AuthChildID = child.ID
-// 		ChildParentID = child.ParentID
+// 		AuthParentID = parent.ID
+// 		ParentParentID = parent.ParentID
 // 	}
-// 	childSample := []struct {
+// 	parentSample := []struct {
 // 		id           string
 // 		parent_id    uint32
 // 		tokenGiven   string
@@ -399,24 +414,24 @@ func TestGetChildByID(t *testing.T) {
 // 	}{
 // 		{
 // 			// Convert int64 to int first before converting to string
-// 			id:           strconv.Itoa(int(AuthChildID)),
-// 			parent_id:    ChildParentID,
+// 			id:           strconv.Itoa(int(AuthParentID)),
+// 			parent_id:    ParentParentID,
 // 			tokenGiven:   tokenString,
 // 			statusCode:   204,
 // 			errorMessage: "",
 // 		},
 // 		{
 // 			// When empty token is passed
-// 			id:           strconv.Itoa(int(AuthChildID)),
-// 			parent_id:    ChildParentID,
+// 			id:           strconv.Itoa(int(AuthParentID)),
+// 			parent_id:    ParentParentID,
 // 			tokenGiven:   "",
 // 			statusCode:   401,
 // 			errorMessage: "Unauthorized",
 // 		},
 // 		{
 // 			// When incorrect token is passed
-// 			id:           strconv.Itoa(int(AuthChildID)),
-// 			parent_id:    ChildParentID,
+// 			id:           strconv.Itoa(int(AuthParentID)),
+// 			parent_id:    ParentParentID,
 // 			tokenGiven:   "This is an incorrect token",
 // 			statusCode:   401,
 // 			errorMessage: "Unauthorized",
@@ -433,13 +448,13 @@ func TestGetChildByID(t *testing.T) {
 // 			errorMessage: "Unauthorized",
 // 		},
 // 	}
-// 	for _, v := range childSample {
+// 	for _, v := range parentSample {
 
-// 		req, _ := http.NewRequest("GET", "/childs", nil)
+// 		req, _ := http.NewRequest("GET", "/parents", nil)
 // 		req = mux.SetURLVars(req, map[string]string{"id": v.id})
 
 // 		rr := httptest.NewRecorder()
-// 		handler := http.HandlerFunc(server.DeleteChild)
+// 		handler := http.HandlerFunc(server.DeleteParent)
 
 // 		req.Header.Set("Authorization", v.tokenGiven)
 

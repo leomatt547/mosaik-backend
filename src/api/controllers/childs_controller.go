@@ -50,7 +50,7 @@ func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
 	}
-	w.Header().Set("Lacation", fmt.Sprintf("%s%s/%d", r.Host, r.URL.Path, childCreated.ID))
+	w.Header().Set("Location", fmt.Sprintf("%s%s/%d", r.Host, r.URL.Path, childCreated.ID))
 	responses.JSON(w, http.StatusCreated, childCreated)
 }
 
@@ -130,12 +130,6 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Also check if the request user id is equal to the one gotten from token
-	if uid != childUpdate.ParentID {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-
 	childUpdate.Prepare()
 	err = childUpdate.Validate("update")
 	if err != nil {
@@ -144,8 +138,7 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 	}
 
 	childUpdate.ID = child.ID //this is important to tell the model the child id to update, the other update field are set above
-
-	childUpdated, err := childUpdate.UpdateAChild(server.DB)
+	childUpdated, err := childUpdate.UpdateAChild(server.DB, childUpdate.ID)
 
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())

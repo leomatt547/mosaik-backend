@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"html"
+	"log"
 	"strings"
 	"time"
 
@@ -12,15 +13,15 @@ import (
 )
 
 type Child struct {
-	ID        	uint64    `gorm:"primary_key;auto_increment" json:"id"`
-	Nama     	string    	`gorm:"size:255;not null;unique" json:"nama"`
-	Email   	string    	`gorm:"size:255;not null;" json:"email"`
-	Password   	string    	`gorm:"size:255;not null;" json:"password"`
-	Parent    	Parent     `json:"Parent"`
-	ParentID  	uint32    `gorm:"not null" json:"parent_id"`
-	LastLogin   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
-	CreatedAt 	time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt 	time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID        uint64    `gorm:"primary_key;auto_increment" json:"id"`
+	Nama      string    `gorm:"size:255;not null;unique" json:"nama"`
+	Email     string    `gorm:"size:255;not null;" json:"email"`
+	Password  string    `gorm:"size:255;not null;" json:"password"`
+	Parent    Parent    `json:"Parent"`
+	ParentID  uint32    `gorm:"not null" json:"parent_id"`
+	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 func HashChild(password string) ([]byte, error) {
@@ -94,7 +95,6 @@ func (c *Child) Validate(action string) error {
 	}
 }
 
-
 func (c *Child) SaveChild(db *gorm.DB) (*Child, error) {
 	var err error
 	err = db.Debug().Model(&Child{}).Create(&c).Error
@@ -102,6 +102,7 @@ func (c *Child) SaveChild(db *gorm.DB) (*Child, error) {
 		return &Child{}, err
 	}
 	if c.ID != 0 {
+		//Dapatkan id Parent apakah ada atau tidak
 		err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
 		if err != nil {
 			return &Child{}, err
@@ -143,27 +144,45 @@ func (c *Child) FindChildByID(db *gorm.DB, pid uint64) (*Child, error) {
 	return c, nil
 }
 
-func (c *Child) UpdateAChild(db *gorm.DB) (*Child, error) {
-
-	var err error
-
-	err = db.Debug().Model(&Child{}).Where("id = ?", c.ID).Updates(Child{Nama: c.Nama, Email: c.Email, Password: c.Password, UpdatedAt: time.Now()}).Error
+func (c *Child) UpdateAChild(db *gorm.DB, uid uint64) (*Child, error) {
+	// var err error
+	// err = db.Debug().Model(&Child{}).Where("id = ?", c.ID).Updates(Child{Nama: c.Nama, Email: c.Email, Password: c.Password, UpdatedAt: time.Now()}).Error
+	// if err != nil {
+	// 	return &Child{}, err
+	// }
+	// if c.ID != 0 {
+	// 	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
+	// 	if err != nil {
+	// 		return &Child{}, err
+	// 	}
+	// }
+	// return c, nil
+	// To hash the password
+	err := c.BeforeSaveChild()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
+		map[string]interface{}{
+			"password":   c.Password,
+			"nama":       c.Nama,
+			"email":      c.Email,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Child{}, db.Error
+	}
+	// This is the display the updated child
+	err = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&c).Error
 	if err != nil {
 		return &Child{}, err
-	}
-	if c.ID != 0 {
-		err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
-		if err != nil {
-			return &Child{}, err
-		}
 	}
 	return c, nil
 }
 
 func (c *Child) DeleteAChild(db *gorm.DB, pid uint64, uid uint32) (int64, error) {
-
 	db = db.Debug().Model(&Child{}).Where("id = ? and parent_id = ?", pid, uid).Take(&Child{}).Delete(&Child{})
-
 	if db.Error != nil {
 		if gorm.IsRecordNotFoundError(db.Error) {
 			return 0, errors.New("Child not found")
