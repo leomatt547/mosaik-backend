@@ -301,8 +301,8 @@ func seedOneParentAndOneChild() (models.Child, error) {
 		return models.Child{}, err
 	}
 	child := models.Child{
-		Nama:     "This is the nama sam",
-		Email:    "This is the email sam",
+		Nama:     "This is the nama child sam",
+		Email:    "This is the email child sam",
 		ParentID: parent.ID,
 	}
 	err = server.DB.Model(&models.Child{}).Create(&child).Error
