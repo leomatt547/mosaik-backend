@@ -14,7 +14,7 @@ import (
 
 type Parent struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
-	Nama      string    `gorm:"size:255;not null;unique" json:"nama"`
+	Nama      string    `gorm:"size:255;not null;" json:"nama"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
 	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`

@@ -6,11 +6,6 @@ import (
 )
 
 func FormatError(err string) error {
-
-	if strings.Contains(err, "nama") {
-		return errors.New("nama sudah diambil")
-	}
-
 	if strings.Contains(err, "email") {
 		return errors.New("email sudah diambil")
 	}

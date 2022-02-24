@@ -51,7 +51,7 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := server.ParentSignIn(parent.Email, parent.Password)
 	if err != nil {
-		if err.Error() != "hashedPassword" {
+		if err.Error() == "hashedPassword" {
 			formattedError := formaterror.FormatError(err.Error())
 			responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
 			return

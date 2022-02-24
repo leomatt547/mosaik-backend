@@ -21,7 +21,8 @@ func TestCreateChildVisit(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	child, err := seedOneParentAndOneChild()
+	_, child_all, _, _, err := seedParentsAndChildsAndChildVisitsAndUrls()
+	child := child_all[0]
 	if err != nil {
 		log.Fatalf("Cannot seed child %v\n", err)
 	}
@@ -309,7 +310,6 @@ func TestDeleteChildVisit(t *testing.T) {
 		assert.Equal(t, rr.Code, v.statusCode)
 
 		if v.statusCode == 401 && v.errorMessage != "" {
-
 			responseMap := make(map[string]interface{})
 			err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
 			if err != nil {

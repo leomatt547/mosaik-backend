@@ -14,9 +14,9 @@ import (
 
 type Child struct {
 	ID        uint64    `gorm:"primary_key;auto_increment" json:"id"`
-	Nama      string    `gorm:"size:255;not null;unique" json:"nama"`
-	Email     string    `gorm:"size:255;not null;unique;" json:"email"`
-	Password  string    `gorm:"size:255;not null;" json:"password"`
+	Nama      string    `gorm:"size:255;not null;" json:"nama"`
+	Email     string    `gorm:"size:100;not null;unique;" json:"email"`
+	Password  string    `gorm:"size:100;not null;" json:"password"`
 	Parent    Parent    `json:"Parent"`
 	ParentID  uint32    `gorm:"not null" json:"parent_id"`
 	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
@@ -32,7 +32,7 @@ func VerifyPasswordChild(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-func (c *Child) BeforeSaveChild() error {
+func (c *Child) BeforeSave() error {
 	hashedPassword, err := HashChild(c.Password)
 	if err != nil {
 		return err
@@ -45,7 +45,6 @@ func (c *Child) Prepare() {
 	c.ID = 0
 	c.Nama = html.EscapeString(strings.TrimSpace(c.Nama))
 	c.Email = html.EscapeString(strings.TrimSpace(c.Email))
-	c.ParentID = 0
 	c.Parent = Parent{}
 	c.LastLogin = time.Now()
 	c.CreatedAt = time.Now()
@@ -89,6 +88,9 @@ func (c *Child) Validate(action string) error {
 		if c.Email == "" {
 			return errors.New("butuh email")
 		}
+		if c.ParentID == 0 {
+			return errors.New("butuh parent_id")
+		}
 		if err := checkmail.ValidateFormat(c.Email); err != nil {
 			return errors.New("invalid email")
 		}
@@ -105,7 +107,7 @@ func (c *Child) SaveChild(db *gorm.DB) (*Child, error) {
 	}
 	if c.ID != 0 {
 		//Dapatkan id Parent apakah ada atau tidak
-		err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
+		err = db.Debug().Model(&Parent{}).Where("id = ?", &c.ParentID).Take(&c.Parent).Error
 		if err != nil {
 			return &Child{}, err
 		}
@@ -160,15 +162,15 @@ func (c *Child) UpdateAChild(db *gorm.DB, uid uint64) (*Child, error) {
 	// }
 	// return c, nil
 	// To hash the password
-	err := c.BeforeSaveChild()
+	err := c.BeforeSave()
 	if err != nil {
 		log.Fatal(err)
 	}
 	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
 		map[string]interface{}{
-			"password":   c.Password,
 			"nama":       c.Nama,
 			"email":      c.Email,
+			"password":   c.Password,
 			"updated_at": time.Now(),
 		},
 	)

@@ -41,7 +41,7 @@ func TestCreateChild(t *testing.T) {
 		errorMessage string
 	}{
 		{
-			inputJSON:    `{"nama":"jr", "email": "jr@gmail.com", "parent_id": 1}`,
+			inputJSON:    `{"nama":"jr", "email": "jr@gmail.com", "password":"jr123" , "parent_id": 1}`,
 			statusCode:   201,
 			tokenGiven:   tokenString,
 			nama:         "jr",
@@ -50,46 +50,52 @@ func TestCreateChild(t *testing.T) {
 			errorMessage: "",
 		},
 		{
-			inputJSON:    `{"nama":"jr", "email": "jr@gmail.com", "parent_id": 1}`,
+			inputJSON:    `{"nama":"jr_2", "email": "jr@gmail.com",  "password":"jr123", "parent_id": 1}`,
 			statusCode:   500,
 			tokenGiven:   tokenString,
-			errorMessage: "nama sudah diambil",
+			errorMessage: "email sudah diambil",
 		},
 		{
 			// When no token is passed
-			inputJSON:    `{"nama":"When no token is passed", "email": "jr@gmail.com", "parent_id": 1}`,
+			inputJSON:    `{"nama":"When no token is passed", "email": "jr@gmail.com",  "password":"jr123" ,"parent_id": 1}`,
 			statusCode:   401,
 			tokenGiven:   "",
 			errorMessage: "Unauthorized",
 		},
 		{
 			// When incorrect token is passed
-			inputJSON:    `{"nama":"When incorrect token is passed", "email": "jr@gmail.com", "parent_id": 1}`,
+			inputJSON:    `{"nama":"When incorrect token is passed", "email": "jr@gmail.com", "password":"jr123" , "parent_id": 1}`,
 			statusCode:   401,
 			tokenGiven:   "This is an incorrect token",
 			errorMessage: "Unauthorized",
 		},
 		{
-			inputJSON:    `{"nama": "", "email": "jr@gmail.com", "parent_id": 1}`,
+			inputJSON:    `{"nama": "", "email": "jr@gmail.com", "password":"jr123" , "parent_id": 1}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh nama",
 		},
 		{
-			inputJSON:    `{"nama": "This is a nama", "email": "", "parent_id": 1}`,
+			inputJSON:    `{"nama": "This is a nama", "email": "", "password":"jr123" , "parent_id": 1}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh email",
 		},
 		{
-			inputJSON:    `{"nama": "This is an awesome nama", "email": "jr@gmail.com"}`,
+			inputJSON:    `{"nama": "This is an awesome nama", "email": "jr@gmail.com", "password":"jr123"}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh parent_id",
 		},
 		{
+			inputJSON:    `{"nama": "This is an awesome nama", "email": "jr@gmail.com", "parent_id": 1}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh password",
+		},
+		{
 			// When parent 2 uses parent 1 token
-			inputJSON:    `{"nama": "This is an awesome nama", "email": "jr@gmail.com", "parent_id": 2}`,
+			inputJSON:    `{"nama": "This is an awesome nama", "email": "jr@gmail.com", "password":"jr123", "parent_id": 2}`,
 			statusCode:   401,
 			tokenGiven:   tokenString,
 			errorMessage: "Unauthorized",
@@ -116,7 +122,7 @@ func TestCreateChild(t *testing.T) {
 		if v.statusCode == 201 {
 			assert.Equal(t, responseMap["nama"], v.nama)
 			assert.Equal(t, responseMap["email"], v.email)
-			assert.Equal(t, responseMap["parent_id"], float32(v.parent_id)) //just for both ids to have the same type
+			assert.Equal(t, responseMap["parent_id"], float64(v.parent_id)) //just for both ids to have the same type
 		}
 		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
 			assert.Equal(t, responseMap["error"], v.errorMessage)
@@ -258,7 +264,7 @@ func TestUpdateChild(t *testing.T) {
 		{
 			// Convert int64 to int first before converting to string
 			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"jr_2", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			updateJSON:   `{"nama":"jr_2", "email": "jr_2@gmail.com", "password":"jr123", "parent_id": 1}`,
 			statusCode:   200,
 			nama:         "jr_2",
 			email:        "jr_2@gmail.com",
@@ -269,7 +275,7 @@ func TestUpdateChild(t *testing.T) {
 		{
 			// When no token is provided
 			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "password":"jr123", "parent_id": 1}`,
 			tokenGiven:   "",
 			statusCode:   401,
 			errorMessage: "Unauthorized",
@@ -277,51 +283,37 @@ func TestUpdateChild(t *testing.T) {
 		{
 			// When incorrect token is provided
 			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "password":"jr123", "parent_id": 1}`,
 			tokenGiven:   "this is an incorrect token",
 			statusCode:   401,
 			errorMessage: "Unauthorized",
 		},
 		{
-			//Note: "Nama 2" belongs to child 2, and nama must be unique
+			//Note: "Magu Frank" belongs to child 2, and nama must be unique
 			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"Nama 2", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			updateJSON:   `{"nama":"Martin Luth Junior", "email": "magu_jr@gmail.com", "password":"jr123", "parent_id": 1}`,
 			statusCode:   500,
 			tokenGiven:   tokenString,
-			errorMessage: "nama sudah diambil",
+			errorMessage: "email sudah diambil",
 		},
-		{
-			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"", "email": "jr_2@gmail.com", "parent_id": 1}`,
-			statusCode:   422,
-			tokenGiven:   tokenString,
-			errorMessage: "butuh nama",
-		},
-		{
-			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"Awesome nama", "email": "", "parent_id": 1}`,
-			statusCode:   422,
-			tokenGiven:   tokenString,
-			errorMessage: "butuh email",
-		},
-		{
-			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"This is another nama", "email": "jr_2@gmail.com"}`,
-			statusCode:   401,
-			tokenGiven:   tokenString,
-			errorMessage: "Unauthorized",
-		},
+		// {
+		// 	id:           strconv.Itoa(int(AuthChildID)),
+		// 	updateJSON:   `{"nama":"This is another nama", "password":"jr123", "email": "jr_2@gmail.com"}`,
+		// 	statusCode:   401,
+		// 	tokenGiven:   tokenString,
+		// 	errorMessage: "Unauthorized",
+		// },
 		{
 			id:         "unknown",
 			statusCode: 400,
 		},
-		{
-			id:           strconv.Itoa(int(AuthChildID)),
-			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "parent_id": 2}`,
-			tokenGiven:   tokenString,
-			statusCode:   401,
-			errorMessage: "Unauthorized",
-		},
+		// {
+		// 	id:           strconv.Itoa(int(AuthChildID)),
+		// 	updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "password":"jr123", "parent_id": 2}`,
+		// 	tokenGiven:   tokenString,
+		// 	statusCode:   401,
+		// 	errorMessage: "Unauthorized",
+		// },
 	}
 
 	for _, v := range samples {
