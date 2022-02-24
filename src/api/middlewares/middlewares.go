@@ -17,6 +17,14 @@ func SetMiddlewareJSON(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func SetMiddlewareHTML(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cors.EnableCors(&w)
+		w.Header().Set("Content-Type", "text/html")
+		next(w, r)
+	}
+}
+
 func SetMiddlewareAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cors.EnableCors(&w)
