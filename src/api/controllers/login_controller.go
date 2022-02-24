@@ -51,13 +51,19 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := server.ParentSignIn(parent.Email, parent.Password)
 	if err != nil {
-		token, err := server.ChildSignIn(child.Email, child.Password)
-		if err != nil {
+		if err.Error() != "hashedPassword" {
 			formattedError := formaterror.FormatError(err.Error())
 			responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
 			return
+		} else {
+			token, err := server.ChildSignIn(child.Email, child.Password)
+			if err != nil {
+				formattedError := formaterror.FormatError(err.Error())
+				responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+				return
+			}
+			responses.JSON(w, http.StatusOK, token)
 		}
-		responses.JSON(w, http.StatusOK, token)
 	}
 	responses.JSON(w, http.StatusOK, token)
 }
@@ -93,5 +99,5 @@ func (server *Server) ChildSignIn(email, password string) (string, error) {
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}
-	return auth.CreateTokenChild(uint32(child.ID))
+	return auth.CreateTokenChild(uint64(child.ID))
 }
