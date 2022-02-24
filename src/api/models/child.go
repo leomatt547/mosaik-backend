@@ -15,7 +15,7 @@ import (
 type Child struct {
 	ID        uint64    `gorm:"primary_key;auto_increment" json:"id"`
 	Nama      string    `gorm:"size:255;not null;unique" json:"nama"`
-	Email     string    `gorm:"size:255;not null;" json:"email"`
+	Email     string    `gorm:"size:255;not null;unique;" json:"email"`
 	Password  string    `gorm:"size:255;not null;" json:"password"`
 	Parent    Parent    `json:"Parent"`
 	ParentID  uint32    `gorm:"not null" json:"parent_id"`
@@ -33,7 +33,7 @@ func VerifyPasswordChild(hashedPassword, password string) error {
 }
 
 func (c *Child) BeforeSaveChild() error {
-	hashedPassword, err := Hash(c.Password)
+	hashedPassword, err := HashChild(c.Password)
 	if err != nil {
 		return err
 	}
@@ -45,6 +45,7 @@ func (c *Child) Prepare() {
 	c.ID = 0
 	c.Nama = html.EscapeString(strings.TrimSpace(c.Nama))
 	c.Email = html.EscapeString(strings.TrimSpace(c.Email))
+	c.ParentID = 0
 	c.Parent = Parent{}
 	c.LastLogin = time.Now()
 	c.CreatedAt = time.Now()
@@ -55,13 +56,13 @@ func (c *Child) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
 		if c.Nama == "" {
-			return errors.New("required nama")
+			return errors.New("butuh nama")
 		}
 		if c.Password == "" {
-			return errors.New("required password")
+			return errors.New("butuh password")
 		}
 		if c.Email == "" {
-			return errors.New("required email")
+			return errors.New("butuh email")
 		}
 		if err := checkmail.ValidateFormat(c.Email); err != nil {
 			return errors.New("invalid email")
@@ -69,10 +70,10 @@ func (c *Child) Validate(action string) error {
 		return nil
 	case "login":
 		if c.Password == "" {
-			return errors.New("required password")
+			return errors.New("butuh password")
 		}
 		if c.Email == "" {
-			return errors.New("required email")
+			return errors.New("butuh email")
 		}
 		if err := checkmail.ValidateFormat(c.Email); err != nil {
 			return errors.New("invalid email")
@@ -80,13 +81,13 @@ func (c *Child) Validate(action string) error {
 		return nil
 	default:
 		if c.Nama == "" {
-			return errors.New("required nama")
+			return errors.New("butuh nama")
 		}
 		if c.Password == "" {
-			return errors.New("required password")
+			return errors.New("butuh password")
 		}
 		if c.Email == "" {
-			return errors.New("required email")
+			return errors.New("butuh email")
 		}
 		if err := checkmail.ValidateFormat(c.Email); err != nil {
 			return errors.New("invalid email")
@@ -97,7 +98,8 @@ func (c *Child) Validate(action string) error {
 
 func (c *Child) SaveChild(db *gorm.DB) (*Child, error) {
 	var err error
-	err = db.Debug().Model(&Child{}).Create(&c).Error
+	//err = db.Debug().Model(&Child{}).Create(&c).Error
+	err = db.Debug().Create(&c).Error
 	if err != nil {
 		return &Child{}, err
 	}

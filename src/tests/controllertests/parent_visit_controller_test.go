@@ -51,7 +51,7 @@ import (
 // 			inputJSON:    `{"nama":"The nama", "email": "the email", "parent_id": 1}`,
 // 			statusCode:   500,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Nama Already Taken",
+// 			errorMessage: "nama Already Taken",
 // 		},
 // 		{
 // 			// When no token is passed
@@ -71,19 +71,19 @@ import (
 // 			inputJSON:    `{"nama": "", "email": "The email", "parent_id": 1}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Required Nama",
+// 			errorMessage: "butuh nama",
 // 		},
 // 		{
 // 			inputJSON:    `{"nama": "This is a nama", "email": "", "parent_id": 1}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Required Email",
+// 			errorMessage: "butuh email",
 // 		},
 // 		{
 // 			inputJSON:    `{"nama": "This is an awesome nama", "email": "the email"}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Required Author",
+// 			errorMessage: "butuh Author",
 // 		},
 // 		{
 // 			// When parent 2 uses parent 1 token
@@ -296,26 +296,26 @@ func TestGetParentVisitByID(t *testing.T) {
 // 			errorMessage: "Unauthorized",
 // 		},
 // 		{
-// 			//Note: "Nama 2" belongs to parent 2, and nama must be unique
+// 			//Note: "nama 2" belongs to parent 2, and nama must be unique
 // 			id:           strconv.Itoa(int(AuthParentID)),
-// 			updateJSON:   `{"nama":"Nama 2", "email": "This is the updated email", "parent_id": 1}`,
+// 			updateJSON:   `{"nama":"nama 2", "email": "This is the updated email", "parent_id": 1}`,
 // 			statusCode:   500,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Nama Already Taken",
+// 			errorMessage: "nama Already Taken",
 // 		},
 // 		{
 // 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"", "email": "This is the updated email", "parent_id": 1}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Required Nama",
+// 			errorMessage: "butuh nama",
 // 		},
 // 		{
 // 			id:           strconv.Itoa(int(AuthParentID)),
 // 			updateJSON:   `{"nama":"Awesome nama", "email": "", "parent_id": 1}`,
 // 			statusCode:   422,
 // 			tokenGiven:   tokenString,
-// 			errorMessage: "Required Email",
+// 			errorMessage: "butuh email",
 // 		},
 // 		{
 // 			id:           strconv.Itoa(int(AuthParentID)),
