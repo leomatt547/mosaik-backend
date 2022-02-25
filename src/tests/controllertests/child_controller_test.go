@@ -296,24 +296,24 @@ func TestUpdateChild(t *testing.T) {
 			tokenGiven:   tokenString,
 			errorMessage: "email sudah diambil",
 		},
-		// {
-		// 	id:           strconv.Itoa(int(AuthChildID)),
-		// 	updateJSON:   `{"nama":"This is another nama", "password":"jr123", "email": "jr_2@gmail.com"}`,
-		// 	statusCode:   401,
-		// 	tokenGiven:   tokenString,
-		// 	errorMessage: "Unauthorized",
-		// },
+		{
+			id:           strconv.Itoa(int(AuthChildID + 1)),
+			updateJSON:   `{"nama":"This is another nama", "password":"jr123", "email": "jr_2@gmail.com"}`,
+			statusCode:   401,
+			tokenGiven:   tokenString,
+			errorMessage: "Unauthorized",
+		},
 		{
 			id:         "unknown",
 			statusCode: 400,
 		},
-		// {
-		// 	id:           strconv.Itoa(int(AuthChildID)),
-		// 	updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "password":"jr123", "parent_id": 2}`,
-		// 	tokenGiven:   tokenString,
-		// 	statusCode:   401,
-		// 	errorMessage: "Unauthorized",
-		// },
+		{
+			id:           strconv.Itoa(int(AuthChildID + 1)),
+			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "password":"jr123", "parent_id": 1}`,
+			tokenGiven:   tokenString,
+			statusCode:   401,
+			errorMessage: "Unauthorized",
+		},
 	}
 
 	for _, v := range samples {
