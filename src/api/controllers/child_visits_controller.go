@@ -132,6 +132,14 @@ func (server *Server) DeleteChildVisit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	child := models.Child{}
+	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", childvisit.ChildID).Take(&child).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, errors.New("Unauthorized"))
+		return
+	}
+
+	childvisit.Child = child
 	// Is the authenticated user, the owner of this child?
 	if uid != childvisit.Child.ParentID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))

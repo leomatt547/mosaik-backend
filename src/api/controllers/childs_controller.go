@@ -129,14 +129,12 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-
 	childUpdate.Prepare()
 	err = childUpdate.Validate("update")
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-
 	childUpdate.ID = child.ID //this is important to tell the model the child id to update, the other update field are set above
 	childUpdated, err := childUpdate.UpdateAChild(server.DB, childUpdate.ID)
 

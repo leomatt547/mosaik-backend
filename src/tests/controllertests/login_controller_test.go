@@ -101,7 +101,7 @@ func TestSignInChild(t *testing.T) {
 	}
 }
 
-func TestLogin(t *testing.T) {
+func TestLoginParent(t *testing.T) {
 
 	refreshParentTable()
 
@@ -123,6 +123,84 @@ func TestLogin(t *testing.T) {
 		},
 		{
 			inputJSON:    `{"email": "pet@gmail.com", "password": "wrong password"}`,
+			statusCode:   422,
+			errorMessage: "incorrect password",
+		},
+		{
+			inputJSON:    `{"email": "frank@gmail.com", "password": "password"}`,
+			statusCode:   422,
+			errorMessage: "incorrect details",
+		},
+		{
+			inputJSON:    `{"email": "kangmail.com", "password": "password"}`,
+			statusCode:   422,
+			errorMessage: "invalid email",
+		},
+		{
+			inputJSON:    `{"email": "", "password": "password"}`,
+			statusCode:   422,
+			errorMessage: "butuh email",
+		},
+		{
+			inputJSON:    `{"email": "kan@gmail.com", "password": ""}`,
+			statusCode:   422,
+			errorMessage: "butuh password",
+		},
+		{
+			inputJSON:    `{"email": "", "password": "password"}`,
+			statusCode:   422,
+			errorMessage: "butuh email",
+		},
+	}
+
+	for _, v := range samples {
+
+		req, err := http.NewRequest("POST", "/login", bytes.NewBufferString(v.inputJSON))
+		if err != nil {
+			t.Errorf("this is the error: %v", err)
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(server.Login)
+		handler.ServeHTTP(rr, req)
+
+		assert.Equal(t, rr.Code, v.statusCode)
+		if v.statusCode == 200 {
+			assert.NotEqual(t, rr.Body.String(), "")
+		}
+
+		if v.statusCode == 422 && v.errorMessage != "" {
+			responseMap := make(map[string]interface{})
+			err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+			if err != nil {
+				t.Errorf("Cannot convert to json: %v", err)
+			}
+			assert.Equal(t, responseMap["error"], v.errorMessage)
+		}
+	}
+}
+
+func TestLoginChild(t *testing.T) {
+
+	refreshParentAndChildTable()
+
+	_, err := seedOneParentAndOneChild()
+	if err != nil {
+		fmt.Printf("This is the error %v\n", err)
+	}
+	samples := []struct {
+		inputJSON    string
+		statusCode   int
+		email        string
+		password     string
+		errorMessage string
+	}{
+		{
+			inputJSON:    `{"email": "sam_jr@gmail.com", "password": "password"}`,
+			statusCode:   200,
+			errorMessage: "",
+		},
+		{
+			inputJSON:    `{"email": "sam_jr@gmail.com", "password": "wrong password"}`,
 			statusCode:   422,
 			errorMessage: "incorrect password",
 		},

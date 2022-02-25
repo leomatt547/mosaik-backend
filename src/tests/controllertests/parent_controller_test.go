@@ -41,11 +41,6 @@ func TestCreateParent(t *testing.T) {
 			errorMessage: "email sudah diambil",
 		},
 		{
-			inputJSON:    `{"nama":"Pet", "email": "grand@gmail.com", "password": "password"}`,
-			statusCode:   500,
-			errorMessage: "nama sudah diambil",
-		},
-		{
 			inputJSON:    `{"nama":"Kan", "email": "kangmail.com", "password": "password"}`,
 			statusCode:   422,
 			errorMessage: "invalid email",
@@ -252,14 +247,6 @@ func TestUpdateParent(t *testing.T) {
 			statusCode:   500,
 			tokenGiven:   tokenString,
 			errorMessage: "email sudah diambil",
-		},
-		{
-			// Remember "Kenny Morris" belongs to parent 2
-			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"nama":"Kenny Morris", "email": "grand@gmail.com", "password": "password"}`,
-			statusCode:   500,
-			tokenGiven:   tokenString,
-			errorMessage: "nama sudah diambil",
 		},
 		{
 			id:           strconv.Itoa(int(AuthID)),

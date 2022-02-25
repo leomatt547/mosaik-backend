@@ -67,6 +67,10 @@ func (cv *ChildVisit) FindAllChildVisits(db *gorm.DB) (*[]ChildVisit, error) {
 			if err != nil {
 				return &[]ChildVisit{}, err
 			}
+			err = db.Debug().Model(&Parent{}).Where("id = ?", childvisits[i].Child.ParentID).Take(&childvisits[i].Child.Parent).Error
+			if err != nil {
+				return &[]ChildVisit{}, err
+			}
 			//Dapatkan id Url
 			err = db.Debug().Model(&Url{}).Where("id = ?", childvisits[i].UrlID).Take(&childvisits[i].Url).Error
 			if err != nil {

@@ -51,28 +51,41 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := server.ParentSignIn(parent.Email, parent.Password)
 	if err != nil {
-		if err.Error() != "hashedPassword" {
+		//fmt.Println("errornya di:" + err.Error())
+		if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" {
 			formattedError := formaterror.FormatError(err.Error())
 			responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
 			return
 		} else {
 			token, err := server.ChildSignIn(child.Email, child.Password)
 			if err != nil {
-				formattedError := formaterror.FormatError(err.Error())
-				responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
-				return
+				//fmt.Println("errornya child di:" + err.Error())
+				if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" {
+					formattedError := formaterror.FormatError(err.Error())
+					responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+					return
+				} else if err.Error() == "record not found" {
+					formattedError := formaterror.FormatError(err.Error())
+					responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+					return
+				} else {
+					formattedError := formaterror.FormatError(err.Error())
+					responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+					return
+				}
 			}
 			responses.JSON(w, http.StatusOK, token)
 		}
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
+		return
 	}
 	responses.JSON(w, http.StatusOK, token)
 }
 
 func (server *Server) ParentSignIn(email, password string) (string, error) {
 	var err error
-
 	parent := models.Parent{}
-
 	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", email).Take(&parent).Error
 	if err != nil {
 		return "", err
@@ -87,15 +100,13 @@ func (server *Server) ParentSignIn(email, password string) (string, error) {
 
 func (server *Server) ChildSignIn(email, password string) (string, error) {
 	var err error
-
 	child := models.Child{}
-
 	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", email).Take(&child).Error
 	if err != nil {
 		return "", err
 	}
 
-	err = models.VerifyPassword(child.Password, password)
+	err = models.VerifyPasswordChild(child.Password, password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}

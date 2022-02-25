@@ -42,8 +42,8 @@ func TestSaveChild(t *testing.T) {
 
 	newChild := models.Child{
 		ID:       1,
-		Nama:     "This is the nama",
-		Email:    "This is the email",
+		Nama:     "sam_jr",
+		Email:    "sam_jr@gmail.com",
 		ParentID: parent.ID,
 	}
 	savedChild, err := newChild.SaveChild(server.DB)
