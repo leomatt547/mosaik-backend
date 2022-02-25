@@ -253,7 +253,7 @@ func seedParentsAndChildsAndChildVisitsAndUrls() ([]models.Parent, []models.Chil
 		}
 
 		childvisits[i].ChildID = childs[i].ID
-		childvisits[i].Child = childs[i]
+		childvisits[i].Child = childs[int(childvisits[i].ChildID)-1]
 		childvisits[i].UrlID = urls[i].ID
 		err = server.DB.Model(&models.ChildVisit{}).Create(&childvisits[i]).Error
 		if err != nil {
@@ -261,6 +261,75 @@ func seedParentsAndChildsAndChildVisitsAndUrls() ([]models.Parent, []models.Chil
 		}
 	}
 	return parents, childs, childvisits, urls, nil
+}
+
+func seedOneParentAndOneChildAndOneUrl() (models.Child, models.Url, error) {
+	var err error
+	if err != nil {
+		return models.Child{}, models.Url{}, err
+	}
+	var url = models.Url{
+		Url:   "www.google.com",
+		Title: "Google",
+	}
+	child, err := seedOneParentAndOneChild()
+	if err != nil {
+		log.Fatalf("cannot seed parents and childs table: %v", err)
+	}
+
+	err = server.DB.Model(&models.Url{}).Create(&url).Error
+	if err != nil {
+		log.Fatalf("cannot seed urls table: %v", err)
+	}
+	return child, url, nil
+}
+
+func seedParentsAndParentvisitsAndUrls() ([]models.Parent, []models.ParentVisit, []models.Url, error) {
+	var err error
+	if err != nil {
+		return []models.Parent{}, []models.ParentVisit{}, []models.Url{}, err
+	}
+	var urls = []models.Url{
+		{
+			Url:   "www.google.com",
+			Title: "Google",
+		},
+		{
+			Url:   "www.facebook.com",
+			Title: "Facebook",
+		},
+	}
+	var parentvisits = []models.ParentVisit{
+		{
+			UrlID:    1,
+			Duration: 5,
+			ParentID: 1,
+		},
+		{
+			UrlID:    2,
+			Duration: 10,
+			ParentID: 2,
+		},
+	}
+	parents, err := seedParents()
+	if err != nil {
+		log.Fatalf("cannot seed parents table: %v", err)
+	}
+
+	for i, _ := range urls {
+		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed urls table: %v", err)
+		}
+
+		parentvisits[i].ID = uint64(parents[i].ID)
+		parentvisits[i].UrlID = urls[i].ID
+		err = server.DB.Model(&models.ParentVisit{}).Create(&parentvisits[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed Parent Visits table: %v", err)
+		}
+	}
+	return parents, parentvisits, urls, nil
 }
 
 func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
@@ -303,6 +372,34 @@ func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
 		}
 	}
 	return parentvisits, urls, nil
+}
+
+func seedParentsAndUrls() ([]models.Parent, []models.Url, error) {
+	var err error
+	if err != nil {
+		return []models.Parent{}, []models.Url{}, err
+	}
+	parents, err := seedParents()
+	if err != nil {
+		log.Fatalf("Cannot seed parents %v\n", err)
+	}
+	var urls = []models.Url{
+		{
+			Url:   "www.google.com",
+			Title: "Google",
+		},
+		{
+			Url:   "www.facebook.com",
+			Title: "Facebook",
+		},
+	}
+	for i, _ := range urls {
+		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed urls table: %v", err)
+		}
+	}
+	return parents, urls, nil
 }
 
 func seedOneChildVisit() (models.ChildVisit, error) {

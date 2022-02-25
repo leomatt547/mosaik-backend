@@ -21,8 +21,7 @@ func TestCreateChildVisit(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, child_all, _, _, err := seedParentsAndChildsAndChildVisitsAndUrls()
-	child := child_all[0]
+	child, _, err := seedOneParentAndOneChildAndOneUrl()
 	if err != nil {
 		log.Fatalf("Cannot seed child %v\n", err)
 	}
@@ -218,7 +217,6 @@ func TestGetChildVisitByID(t *testing.T) {
 
 func TestDeleteChildVisit(t *testing.T) {
 	var ParentEmail, ParentPassword string
-	var ParentID uint32
 	var AuthChildvisitID uint64
 
 	err := refreshAllTable()
@@ -250,11 +248,9 @@ func TestDeleteChildVisit(t *testing.T) {
 			continue
 		}
 		AuthChildvisitID = childvisit.ID
-		ParentID = childvisit.Child.ParentID
 	}
 	childvisitSample := []struct {
 		id           string
-		parent_id    uint32
 		tokenGiven   string
 		statusCode   int
 		errorMessage string
@@ -262,7 +258,6 @@ func TestDeleteChildVisit(t *testing.T) {
 		{
 			// Convert int64 to int first before converting to string
 			id:           strconv.Itoa(int(AuthChildvisitID)),
-			parent_id:    ParentID,
 			tokenGiven:   tokenString,
 			statusCode:   204,
 			errorMessage: "",
@@ -270,7 +265,6 @@ func TestDeleteChildVisit(t *testing.T) {
 		{
 			// When empty token is passed
 			id:           strconv.Itoa(int(AuthChildvisitID)),
-			parent_id:    ParentID,
 			tokenGiven:   "",
 			statusCode:   401,
 			errorMessage: "Unauthorized",
@@ -278,7 +272,6 @@ func TestDeleteChildVisit(t *testing.T) {
 		{
 			// When incorrect token is passed
 			id:           strconv.Itoa(int(AuthChildvisitID)),
-			parent_id:    ParentID,
 			tokenGiven:   "This is an incorrect token",
 			statusCode:   401,
 			errorMessage: "Unauthorized",
@@ -290,7 +283,6 @@ func TestDeleteChildVisit(t *testing.T) {
 		},
 		{
 			id:           strconv.Itoa(int(1)),
-			parent_id:    1,
 			statusCode:   401,
 			errorMessage: "Unauthorized",
 		},
