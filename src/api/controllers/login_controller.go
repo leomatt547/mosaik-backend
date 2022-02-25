@@ -57,7 +57,7 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 			responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
 			return
 		} else {
-			token, err := server.ChildSignIn(child.Email, child.Password)
+			token, err = server.ChildSignIn(child.Email, child.Password)
 			if err != nil {
 				//fmt.Println("errornya child di:" + err.Error())
 				if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" {
@@ -74,11 +74,7 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			responses.JSON(w, http.StatusOK, token)
 		}
-		formattedError := formaterror.FormatError(err.Error())
-		responses.ERROR(w, http.StatusUnprocessableEntity, formattedError)
-		return
 	}
 	responses.JSON(w, http.StatusOK, token)
 }
