@@ -67,6 +67,7 @@ func (c *Child) Validate(action string) error {
 			return errors.New("invalid email")
 		}
 		return nil
+
 	case "login":
 		if c.Password == "" {
 			return errors.New("butuh password")
@@ -78,6 +79,25 @@ func (c *Child) Validate(action string) error {
 			return errors.New("invalid email")
 		}
 		return nil
+
+	case "updatepassword":
+		if c.Password == "" {
+			return errors.New("butuh password")
+		}
+		return nil
+
+	case "updateprofile":
+		if c.Nama == "" {
+			return errors.New("butuh nama")
+		}
+		if c.Email == "" {
+			return errors.New("butuh email")
+		}
+		if err := checkmail.ValidateFormat(c.Email); err != nil {
+			return errors.New("invalid email")
+		}
+		return nil
+
 	default:
 		if c.Nama == "" {
 			return errors.New("butuh nama")
@@ -171,6 +191,29 @@ func (c *Child) UpdateAChild(db *gorm.DB, uid uint64) (*Child, error) {
 			"nama":       c.Nama,
 			"email":      c.Email,
 			"password":   c.Password,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Child{}, db.Error
+	}
+	// This is the display the updated child
+	err = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&c).Error
+	if err != nil {
+		return &Child{}, err
+	}
+	return c, nil
+}
+
+func (c *Child) UpdateChildProfile(db *gorm.DB, uid uint64) (*Child, error) {
+	err := c.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
+		map[string]interface{}{
+			"nama":       c.Nama,
+			"email":      c.Email,
 			"updated_at": time.Now(),
 		},
 	)
