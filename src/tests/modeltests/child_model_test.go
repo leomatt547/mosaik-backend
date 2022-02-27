@@ -105,6 +105,33 @@ func TestUpdateAChild(t *testing.T) {
 	assert.Equal(t, updatedChild.ParentID, childUpdate.ParentID)
 }
 
+func TestUpdateChildProfile(t *testing.T) {
+
+	err := refreshParentAndChildTable()
+	if err != nil {
+		log.Fatalf("Error refreshing parent and child table: %v\n", err)
+	}
+	child, err := seedOneParentAndOneChild()
+	if err != nil {
+		log.Fatalf("Error Seeding table")
+	}
+	childUpdate := models.Child{
+		ID:       1,
+		Nama:     "modiUpdate",
+		Email:    "modiupdate@gmail.com",
+		ParentID: child.ParentID,
+	}
+	updatedChild, err := childUpdate.UpdateChildProfile(server.DB, childUpdate.ID)
+	if err != nil {
+		t.Errorf("this is the error updating the child: %v\n", err)
+		return
+	}
+	assert.Equal(t, updatedChild.ID, childUpdate.ID)
+	assert.Equal(t, updatedChild.Nama, childUpdate.Nama)
+	assert.Equal(t, updatedChild.Email, childUpdate.Email)
+	assert.Equal(t, updatedChild.ParentID, childUpdate.ParentID)
+}
+
 func TestDeleteAChild(t *testing.T) {
 
 	err := refreshParentAndChildTable()

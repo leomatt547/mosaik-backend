@@ -64,9 +64,28 @@ func (p *Parent) Validate(action string) error {
 			return errors.New("invalid email")
 		}
 		return nil
+
 	case "login":
 		if p.Password == "" {
 			return errors.New("butuh password")
+		}
+		if p.Email == "" {
+			return errors.New("butuh email")
+		}
+		if err := checkmail.ValidateFormat(p.Email); err != nil {
+			return errors.New("invalid email")
+		}
+		return nil
+
+	case "updatepassword":
+		if p.Password == "" {
+			return errors.New("butuh password")
+		}
+		return nil
+
+	case "updateprofile":
+		if p.Nama == "" {
+			return errors.New("butuh nama")
 		}
 		if p.Email == "" {
 			return errors.New("butuh email")
@@ -132,6 +151,51 @@ func (p *Parent) UpdateAParent(db *gorm.DB, uid uint32) (*Parent, error) {
 			"password":   p.Password,
 			"nama":       p.Nama,
 			"email":      p.Email,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Parent{}, db.Error
+	}
+	// This is the display the updated parent
+	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
+	if err != nil {
+		return &Parent{}, err
+	}
+	return p, nil
+}
+
+func (p *Parent) UpdateParentProfile(db *gorm.DB, uid uint32) (*Parent, error) {
+	err := p.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
+		map[string]interface{}{
+			"nama":       p.Nama,
+			"email":      p.Email,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Parent{}, db.Error
+	}
+	// This is the display the updated parent
+	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
+	if err != nil {
+		return &Parent{}, err
+	}
+	return p, nil
+}
+
+func (p *Parent) UpdateParentPassword(db *gorm.DB, uid uint32) (*Parent, error) {
+	err := p.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
+		map[string]interface{}{
+			"password":   p.Password,
 			"updated_at": time.Now(),
 		},
 	)

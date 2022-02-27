@@ -119,6 +119,49 @@ func (server *Server) UpdateParent(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, updatedParent)
 }
 
+func (server *Server) UpdateParentProfile(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	vars := mux.Vars(r)
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	parent := models.Parent{}
+	err = json.Unmarshal(body, &parent)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	tokenID, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	if tokenID != uint32(uid) {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+	parent.Prepare()
+	err = parent.Validate("updateprofile")
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	updatedParent, err := parent.UpdateParentProfile(server.DB, uint32(uid))
+	if err != nil {
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		return
+	}
+	responses.JSON(w, http.StatusOK, updatedParent)
+}
+
 func (server *Server) DeleteParent(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
