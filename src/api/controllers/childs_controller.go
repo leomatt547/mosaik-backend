@@ -146,6 +146,68 @@ func (server *Server) UpdateChild(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, childUpdated)
 }
 
+func (server *Server) UpdateChildProfile(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	vars := mux.Vars(r)
+
+	// Check if the child id is valid
+	pid, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	//Check if the auth token is valid and  get the user id from it
+	uid, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	// Check if the child exist
+	child := models.Child{}
+	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", pid).Take(&child).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, errors.New("child not found"))
+		return
+	}
+
+	// If a user attempt to update a child not belonging to him
+	if uid != child.ParentID {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	// Read the child data
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	// Start processing the request data
+	childUpdate := models.Child{}
+	err = json.Unmarshal(body, &childUpdate)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	childUpdate.Prepare()
+	err = childUpdate.Validate("updateprofile")
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	childUpdate.ID = child.ID //this is important to tell the model the child id to update, the other update field are set above
+	childUpdated, err := childUpdate.UpdateChildProfile(server.DB, childUpdate.ID)
+
+	if err != nil {
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		return
+	}
+	responses.JSON(w, http.StatusOK, childUpdated)
+}
+
 func (server *Server) DeleteChild(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)

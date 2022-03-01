@@ -347,6 +347,141 @@ func TestUpdateChild(t *testing.T) {
 	}
 }
 
+func TestUpdateChildProfile(t *testing.T) {
+
+	var ParentEmail, ParentPassword string
+	var AuthParentID uint32
+	var AuthChildID uint64
+
+	err := refreshParentAndChildTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parents, childs, err := seedParentsAndChilds()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Get only the first parent
+	for _, parent := range parents {
+		if parent.ID == 2 {
+			continue
+		}
+		ParentEmail = parent.Email
+		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
+	}
+	//Login the parent and get the authentication token
+	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	if err != nil {
+		log.Fatalf("cannot login: %v\n", err)
+	}
+	tokenString := fmt.Sprintf("Bearer %v", token)
+
+	// Get only the first child
+	for _, child := range childs {
+		if child.ID == 2 {
+			continue
+		}
+		AuthChildID = child.ID
+		AuthParentID = child.ParentID
+	}
+	// fmt.Printf("this is the auth child: %v\n", AuthChildID)
+
+	samples := []struct {
+		id           string
+		updateJSON   string
+		statusCode   int
+		nama         string
+		email        string
+		parent_id    uint32
+		tokenGiven   string
+		errorMessage string
+	}{
+		{
+			// Convert int64 to int first before converting to string
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"nama":"jr_2", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			statusCode:   200,
+			nama:         "jr_2",
+			email:        "jr_2@gmail.com",
+			parent_id:    AuthParentID,
+			tokenGiven:   tokenString,
+			errorMessage: "",
+		},
+		{
+			// When no token is provided
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			tokenGiven:   "",
+			statusCode:   401,
+			errorMessage: "Unauthorized",
+		},
+		{
+			// When incorrect token is provided
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			tokenGiven:   "this is an incorrect token",
+			statusCode:   401,
+			errorMessage: "Unauthorized",
+		},
+		{
+			//Note: "Magu Frank" belongs to child 2, and nama must be unique
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"nama":"Martin Luth Junior", "email": "magu_jr@gmail.com", "parent_id": 1}`,
+			statusCode:   500,
+			tokenGiven:   tokenString,
+			errorMessage: "email sudah diambil",
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID + 1)),
+			updateJSON:   `{"nama":"This is another nama", "email": "jr_2@gmail.com"}`,
+			statusCode:   401,
+			tokenGiven:   tokenString,
+			errorMessage: "Unauthorized",
+		},
+		{
+			id:         "unknown",
+			statusCode: 400,
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID + 1)),
+			updateJSON:   `{"nama":"This is still another nama", "email": "jr_2@gmail.com", "parent_id": 1}`,
+			tokenGiven:   tokenString,
+			statusCode:   401,
+			errorMessage: "Unauthorized",
+		},
+	}
+
+	for _, v := range samples {
+
+		req, err := http.NewRequest("POST", "/childs", bytes.NewBufferString(v.updateJSON))
+		if err != nil {
+			t.Errorf("this is the error: %v\n", err)
+		}
+		req = mux.SetURLVars(req, map[string]string{"id": v.id})
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(server.UpdateChildProfile)
+
+		req.Header.Set("Authorization", v.tokenGiven)
+
+		handler.ServeHTTP(rr, req)
+
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			t.Errorf("Cannot convert to json: %v", err)
+		}
+		assert.Equal(t, rr.Code, v.statusCode)
+		if v.statusCode == 200 {
+			assert.Equal(t, responseMap["nama"], v.nama)
+			assert.Equal(t, responseMap["email"], v.email)
+			assert.Equal(t, responseMap["parent_id"], float64(v.parent_id)) //just to match the type of the json we receive thats why we used float64
+		}
+		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
+			assert.Equal(t, responseMap["error"], v.errorMessage)
+		}
+	}
+}
+
 func TestDeleteChild(t *testing.T) {
 
 	var ParentEmail, ParentPassword string

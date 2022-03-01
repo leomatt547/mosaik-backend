@@ -315,6 +315,145 @@ func TestUpdateParent(t *testing.T) {
 	}
 }
 
+func TestUpdateParentProfile(t *testing.T) {
+
+	var AuthEmail, AuthPassword string
+	var AuthID uint32
+
+	err := refreshParentTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parents, err := seedParents() //we need atleast two parents to properly check the update
+	if err != nil {
+		log.Fatalf("Error seeding parent: %v\n", err)
+	}
+	// Get only the first parent
+	for _, parent := range parents {
+		if parent.ID == 2 {
+			continue
+		}
+		AuthID = parent.ID
+		AuthEmail = parent.Email
+		AuthPassword = "password" //Note the password in the database is already hashed, we want unhashed
+	}
+	//Login the parent and get the authentication token
+	token, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	if err != nil {
+		log.Fatalf("cannot login parent: %v\n", err)
+	}
+	tokenString := fmt.Sprintf("Bearer %v", token)
+
+	samples := []struct {
+		id           string
+		updateJSON   string
+		statusCode   int
+		updateNama   string
+		updateEmail  string
+		tokenGiven   string
+		errorMessage string
+	}{
+		{
+			// Convert int32 to int first before converting to string
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama":"Grand", "email": "grand@gmail.com"}`,
+			statusCode:   200,
+			updateNama:   "Grand",
+			updateEmail:  "grand@gmail.com",
+			tokenGiven:   tokenString,
+			errorMessage: "",
+		},
+		{
+			// When no token was passed
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama":"Man", "email": "man@gmail.com"}`,
+			statusCode:   401,
+			tokenGiven:   "",
+			errorMessage: "Unauthorized",
+		},
+		{
+			// When incorrect token was passed
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama":"Woman", "email": "woman@gmail.com"}`,
+			statusCode:   401,
+			tokenGiven:   "This is incorrect token",
+			errorMessage: "Unauthorized",
+		},
+		{
+			// Remember "kenny@gmail.com" belongs to parent 2
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama":"Frank", "email": "kenny@gmail.com"}`,
+			statusCode:   500,
+			tokenGiven:   tokenString,
+			errorMessage: "email sudah diambil",
+		},
+		{
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama":"Kan", "email": "kangmail.com"}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "invalid email",
+		},
+		{
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama": "", "email": "kan@gmail.com"}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh nama",
+		},
+		{
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"nama": "Kan", "email": ""}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh email",
+		},
+		{
+			id:         "unknown",
+			tokenGiven: tokenString,
+			statusCode: 400,
+		},
+		{
+			// When parent 2 is using parent 1 token
+			id:           strconv.Itoa(int(2)),
+			updateJSON:   `{"nama": "Mike", "email": "mike@gmail.com"}`,
+			tokenGiven:   tokenString,
+			statusCode:   401,
+			errorMessage: "Unauthorized",
+		},
+	}
+
+	for _, v := range samples {
+
+		req, err := http.NewRequest("POST", "/parents", bytes.NewBufferString(v.updateJSON))
+		if err != nil {
+			t.Errorf("This is the error: %v\n", err)
+		}
+		req = mux.SetURLVars(req, map[string]string{"id": v.id})
+
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(server.UpdateParentProfile)
+
+		req.Header.Set("Authorization", v.tokenGiven)
+
+		handler.ServeHTTP(rr, req)
+
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			t.Errorf("Cannot convert to json: %v", err)
+		}
+		assert.Equal(t, rr.Code, v.statusCode)
+		if v.statusCode == 200 {
+			assert.Equal(t, responseMap["nama"], v.updateNama)
+			assert.Equal(t, responseMap["email"], v.updateEmail)
+		}
+		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
+			assert.Equal(t, responseMap["error"], v.errorMessage)
+		}
+	}
+}
+
 func TestDeleteParent(t *testing.T) {
 
 	var AuthEmail, AuthPassword string

@@ -40,7 +40,7 @@ func TestSaveParent(t *testing.T) {
 	newParent := models.Parent{
 		ID:       1,
 		Email:    "test@gmail.com",
-		Nama: "test",
+		Nama:     "test",
 		Password: "password",
 	}
 	savedParent, err := newParent.SaveParent(server.DB)
@@ -88,11 +88,38 @@ func TestUpdateAParent(t *testing.T) {
 
 	parentUpdate := models.Parent{
 		ID:       1,
-		Nama: "modiUpdate",
+		Nama:     "modiUpdate",
 		Email:    "modiupdate@gmail.com",
 		Password: "password",
 	}
 	updatedParent, err := parentUpdate.UpdateAParent(server.DB, parent.ID)
+	if err != nil {
+		t.Errorf("this is the error updating the parent: %v\n", err)
+		return
+	}
+	assert.Equal(t, updatedParent.ID, parentUpdate.ID)
+	assert.Equal(t, updatedParent.Email, parentUpdate.Email)
+	assert.Equal(t, updatedParent.Nama, parentUpdate.Nama)
+}
+
+func TestUpdateParentProfile(t *testing.T) {
+
+	err := refreshParentTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	parent, err := seedOneParent()
+	if err != nil {
+		log.Fatalf("Cannot seed parent: %v\n", err)
+	}
+
+	parentUpdate := models.Parent{
+		ID:    1,
+		Nama:  "modiUpdate",
+		Email: "modiupdate@gmail.com",
+	}
+	updatedParent, err := parentUpdate.UpdateParentProfile(server.DB, parent.ID)
 	if err != nil {
 		t.Errorf("this is the error updating the parent: %v\n", err)
 		return
