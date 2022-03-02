@@ -78,9 +78,9 @@ func (server *Server) GetChildVisits(w http.ResponseWriter, r *http.Request) {
 		//query child_id diterima
 		childvisit := models.ChildVisit{}
 
-		childs, err := childvisit.FindChildVisitsbyChildID(server.DB, cid)
-		if err != nil {
-			responses.ERROR(w, http.StatusInternalServerError, err)
+		childs, err2 := childvisit.FindChildVisitsbyChildID(server.DB, cid)
+		if err2 != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err2)
 			return
 		}
 		responses.JSON(w, http.StatusOK, childs)
