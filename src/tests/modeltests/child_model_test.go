@@ -12,7 +12,7 @@ import (
 
 func TestFindAllChilds(t *testing.T) {
 
-	err := refreshParentAndChildTable()
+	err := refreshAllTable()
 	if err != nil {
 		log.Fatalf("Error refreshing parent and child table %v\n", err)
 	}
