@@ -18,6 +18,7 @@ var parentInstance = models.Parent{}
 var childInstance = models.Child{}
 var childVisitInstance = models.ChildVisit{}
 var parentVisitInstance = models.ParentVisit{}
+var parentDownloadInstance = models.ParentDownload{}
 var urlInstance = models.Url{}
 
 func TestMain(m *testing.M) {
@@ -86,11 +87,11 @@ func refreshParentAndChildTable() error {
 
 func refreshAllTable() error {
 
-	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
+	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}, &models.ParentDownload{}).Error
 	if err != nil {
 		return err
 	}
-	err = server.DB.AutoMigrate(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
+	err = server.DB.AutoMigrate(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}, &models.ParentDownload{}).Error
 	if err != nil {
 		return err
 	}
@@ -159,6 +160,26 @@ func seedOneParentVisit() (models.ParentVisit, error) {
 		log.Fatalf("cannot seed Parent Visit table: %v", err)
 	}
 	return parentvisits, nil
+}
+
+func seedOneParentDownload() (models.ParentDownload, error) {
+	var parentdownloads = models.ParentDownload{
+		ID:             1,
+		TargetPath:     "D:/",
+		ReceivedBytes:  300,
+		TotalBytes:     300,
+		SiteUrl:        "www.youtube.com",
+		TabUrl:         "youtube.com/tabURL",
+		TabReferredUrl: "youtube.com/tabURL",
+		MimeType:       "text/html",
+		ParentID:       1,
+	}
+
+	err := server.DB.Model(&models.ParentDownload{}).Create(&parentdownloads).Error
+	if err != nil {
+		log.Fatalf("cannot seed Parent Download table: %v", err)
+	}
+	return parentdownloads, nil
 }
 
 func seedParents() error {
@@ -299,6 +320,42 @@ func seedChildVisitsAndUrls() ([]models.ChildVisit, []models.Url, error) {
 		}
 	}
 	return childvisits, urls, nil
+}
+
+func seedParentDownloads() ([]models.ParentDownload, error) {
+	var err error
+	if err != nil {
+		return []models.ParentDownload{}, err
+	}
+	var parentdownloads = []models.ParentDownload{
+		{
+			TargetPath:     "D:/",
+			ReceivedBytes:  100,
+			TotalBytes:     100,
+			SiteUrl:        "www.google.com",
+			TabUrl:         "google.com/tabURL",
+			TabReferredUrl: "google.com/tabURL",
+			MimeType:       "text/html",
+			ParentID:       1,
+		},
+		{
+			TargetPath:     "C:/",
+			ReceivedBytes:  200,
+			TotalBytes:     200,
+			SiteUrl:        "www.google.com",
+			TabUrl:         "google.com/tabURL",
+			TabReferredUrl: "google.com/tabURL",
+			MimeType:       "text/html",
+			ParentID:       2,
+		},
+	}
+	for i, _ := range parentdownloads {
+		err = server.DB.Model(&models.ParentDownload{}).Create(&parentdownloads[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed Parent Downloads table: %v", err)
+		}
+	}
+	return parentdownloads, nil
 }
 
 func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
