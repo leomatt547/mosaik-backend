@@ -3,6 +3,7 @@ package controllertests
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -487,6 +488,7 @@ func TestUpdateParentPassword(t *testing.T) {
 		id             string
 		updateJSON     string
 		statusCode     int
+		email          string
 		updatePassword string
 		tokenGiven     string
 		errorMessage   string
@@ -496,6 +498,7 @@ func TestUpdateParentPassword(t *testing.T) {
 			id:             strconv.Itoa(int(AuthID)),
 			updateJSON:     `{"email": "grand@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:     200,
+			email:          "grand@gmail.com",
 			updatePassword: "newpassword",
 			tokenGiven:     tokenString,
 			errorMessage:   "",
@@ -574,7 +577,12 @@ func TestUpdateParentPassword(t *testing.T) {
 		}
 		assert.Equal(t, rr.Code, v.statusCode)
 		if v.statusCode == 200 {
-			assert.Equal(t, responseMap["password"], v.updatePassword)
+			token, err := server.ChildSignIn(v.email, v.updatePassword)
+			if err != nil {
+				assert.Equal(t, err, errors.New(v.errorMessage))
+			} else {
+				assert.NotEqual(t, token, "")
+			}
 		}
 		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
 			assert.Equal(t, responseMap["error"], v.errorMessage)
