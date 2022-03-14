@@ -84,6 +84,12 @@ func (c *Child) Validate(action string) error {
 		if c.Password == "" {
 			return errors.New("butuh password")
 		}
+		if c.Email == "" {
+			return errors.New("butuh email")
+		}
+		if err := checkmail.ValidateFormat(c.Email); err != nil {
+			return errors.New("invalid email")
+		}
 		return nil
 
 	case "updateprofile":
@@ -214,6 +220,29 @@ func (c *Child) UpdateChildProfile(db *gorm.DB, uid uint64) (*Child, error) {
 		map[string]interface{}{
 			"nama":       c.Nama,
 			"email":      c.Email,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Child{}, db.Error
+	}
+	// This is the display the updated child
+	err = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&c).Error
+	if err != nil {
+		return &Child{}, err
+	}
+	return c, nil
+}
+
+func (c *Child) UpdateChildPassword(db *gorm.DB, uid uint64) (*Child, error) {
+
+	err := c.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
+		map[string]interface{}{
+			"password":   c.Password,
 			"updated_at": time.Now(),
 		},
 	)

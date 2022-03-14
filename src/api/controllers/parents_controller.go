@@ -12,6 +12,7 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gorilla/mux"
 )
@@ -149,6 +150,68 @@ func (server *Server) UpdateParentProfile(w http.ResponseWriter, r *http.Request
 	}
 	parent.Prepare()
 	err = parent.Validate("updateprofile")
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	updatedParent, err := parent.UpdateParentProfile(server.DB, uint32(uid))
+	if err != nil {
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		return
+	}
+	responses.JSON(w, http.StatusOK, updatedParent)
+}
+
+func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	type Data struct {
+		Email       string `json:"email"`
+		OldPassword string `json:"oldPassword"`
+		NewPassword string `json:"newPassword"`
+	}
+
+	var data Data
+	vars := mux.Vars(r)
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	parent := models.Parent{}
+	err = json.Unmarshal(body, &data)
+
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", data.Email).Take(&parent).Error
+	if err != nil {
+		return
+	}
+	err = models.VerifyPassword(parent.Password, data.OldPassword)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return
+	}
+
+	tokenID, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	if tokenID != uint32(uid) {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+
+	parent.Prepare()
+	parent.Password = data.NewPassword
+	err = parent.Validate("updatepassword")
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
