@@ -254,7 +254,7 @@ func TestDeleteParentDownload(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	parents, parentdownloads, err := seedParentsAndParentdownloadsAndUrls()
+	parents, parentdownloads, err := seedParentsAndParentDownloads()
 	if err != nil {
 		log.Fatal(err)
 	}
