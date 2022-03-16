@@ -206,16 +206,16 @@ func seedParents() error {
 }
 
 func seedOneParentAndOneChild() (models.Child, error) {
-	err := refreshParentAndChildTable()
-	if err != nil {
-		return models.Child{}, err
-	}
+	// err := refreshParentAndChildTable()
+	// if err != nil {
+	// 	return models.Child{}, err
+	// }
 	parent := models.Parent{
 		Nama:     "Sam Phil",
 		Email:    "sam@gmail.com",
 		Password: "password",
 	}
-	err = server.DB.Model(&models.Parent{}).Create(&parent).Error
+	err := server.DB.Model(&models.Parent{}).Create(&parent).Error
 	if err != nil {
 		return models.Child{}, err
 	}
