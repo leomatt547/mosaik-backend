@@ -33,58 +33,78 @@ func TestCreateParentDownload(t *testing.T) {
 	tokenString := fmt.Sprintf("Bearer %v", token)
 
 	samples := []struct {
-		inputJSON    string
-		statusCode   int
-		url_id       uint64
-		duration     uint64
-		parent_id    uint32
-		tokenGiven   string
-		errorMessage string
+		inputJSON     string
+		statusCode    int
+		targetPath    string
+		receivedBytes uint64
+		totalBytes    uint64
+		siteUrl       string
+		tabUrl        string
+		mimeType      string
+		parent_id     uint32
+		tokenGiven    string
+		errorMessage  string
 	}{
 		{
-			inputJSON:    `{"url_id": 1, "duration": 10, "parent_id": 1}`,
-			statusCode:   201,
-			tokenGiven:   tokenString,
-			url_id:       1,
-			duration:     10,
-			parent_id:    parent.ID,
-			errorMessage: "",
+			inputJSON:     `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 1}`,
+			statusCode:    201,
+			tokenGiven:    tokenString,
+			parent_id:     parent.ID,
+			targetPath:    "D:/",
+			receivedBytes: 100,
+			totalBytes:    100,
+			siteUrl:       "www.google.com",
+			tabUrl:        "google.com/tabURL",
+			mimeType:      "text/html",
+			errorMessage:  "",
 		},
 		{
 			// When no token is passed
-			inputJSON:    `{"url_id": 1, "duration": 10, "parent_id": 1}`,
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 1}`,
 			statusCode:   401,
 			tokenGiven:   "",
 			errorMessage: "Unauthorized",
 		},
 		{
 			// When incorrect token is passed
-			inputJSON:    `{"url_id": 1, "duration": 10, "parent_id": 1}`,
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 1}`,
 			statusCode:   401,
 			tokenGiven:   "This is an incorrect token",
 			errorMessage: "Unauthorized",
 		},
 		{
-			inputJSON:    `{"url_id": 0, "duration": 10, "parent_id": 1}`,
+			inputJSON:    `{"target_path": "", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 1}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
-			errorMessage: "butuh url_id",
+			errorMessage: "butuh target_path",
 		},
 		{
-			inputJSON:    `{"url_id": 1, "duration": 0, "parent_id": 1}`,
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 1}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
-			errorMessage: "butuh durasi",
+			errorMessage: "butuh site_url",
 		},
 		{
-			inputJSON:    `{"url_id": 1, "duration": 10, "parent_id": 0}`,
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "", "mime_type": "text/html", "parent_id": 1}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
-			errorMessage: "butuh parent_id",
+			errorMessage: "butuh tab_url",
+		},
+		{
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "", "parent_id": 1}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh mime_type",
+		},
+		{
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 0}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh parent",
 		},
 		{
 			// When parent 2 uses parent 1 token
-			inputJSON:    `{"url_id": 1, "duration": 10, "parent_id": 2}`,
+			inputJSON:    `{"target_path": "D:/", "received_bytes": 100, "total_bytes": 100, "site_url":  "www.google.com", "tab_url": "google.com/tabURL", "mime_type": "text/html", "parent_id": 2}`,
 			statusCode:   401,
 			tokenGiven:   tokenString,
 			errorMessage: "Unauthorized",
@@ -109,9 +129,13 @@ func TestCreateParentDownload(t *testing.T) {
 		}
 		assert.Equal(t, rr.Code, v.statusCode)
 		if v.statusCode == 201 {
-			assert.Equal(t, responseMap["url_id"], float64(v.url_id))
-			assert.Equal(t, responseMap["duration"], float64(v.duration))
 			assert.Equal(t, responseMap["parent_id"], float64(v.parent_id)) //just for both ids to have the same type
+			assert.Equal(t, responseMap["target_path"], v.targetPath)
+			assert.Equal(t, responseMap["received_bytes"], float64(v.receivedBytes))
+			assert.Equal(t, responseMap["total_bytes"], float64(v.totalBytes))
+			assert.Equal(t, responseMap["site_url"], v.siteUrl)
+			assert.Equal(t, responseMap["tab_url"], v.tabUrl)
+			assert.Equal(t, responseMap["mime_type"], v.mimeType)
 		}
 		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
 			assert.Equal(t, responseMap["error"], v.errorMessage)
@@ -121,10 +145,6 @@ func TestCreateParentDownload(t *testing.T) {
 
 func TestGetParentDownloads(t *testing.T) {
 	err := refreshAllTable()
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = seedParents()
 	if err != nil {
 		log.Fatal(err)
 	}
