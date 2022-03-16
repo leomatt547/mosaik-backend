@@ -186,11 +186,13 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 	parent := models.Parent{}
 	err = json.Unmarshal(body, &data)
 
+	parent.Email = data.Email
+
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", data.Email).Take(&parent).Error
+	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", parent.Email).Take(&parent).Error
 	if err != nil {
 		return
 	}
@@ -209,14 +211,14 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	parent.Prepare()
 	parent.Password = data.NewPassword
+	parent.Prepare()
 	err = parent.Validate("updatepassword")
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	updatedParent, err := parent.UpdateParentProfile(server.DB, uint32(uid))
+	updatedParent, err := parent.UpdateParentPassword(server.DB, uint32(uid))
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
