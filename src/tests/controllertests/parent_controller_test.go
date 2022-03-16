@@ -496,23 +496,23 @@ func TestUpdateParentPassword(t *testing.T) {
 		{
 			// Convert int32 to int first before converting to string
 			id:             strconv.Itoa(int(AuthID)),
-			updateJSON:     `{"email": "grand@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			updateJSON:     `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:     200,
-			email:          "grand@gmail.com",
+			email:          "steven@gmail.com",
 			updatePassword: "newpassword",
 			tokenGiven:     tokenString,
 			errorMessage:   "",
 		},
 		{
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "woman@gmail.com", "oldPassword": "", "newPassword": "newpassword"}`,
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "", "newPassword": "newpassword"}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh old password",
 		},
 		{
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "woman@gmail.com", "oldPassword": "password", "newPassword": ""}`,
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": ""}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh new password",
@@ -520,7 +520,7 @@ func TestUpdateParentPassword(t *testing.T) {
 		{
 			// When no token was passed
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "grand@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:   401,
 			tokenGiven:   "",
 			errorMessage: "Unauthorized",
@@ -528,7 +528,7 @@ func TestUpdateParentPassword(t *testing.T) {
 		{
 			// When incorrect token was passed
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "grand@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:   401,
 			tokenGiven:   "This is incorrect token",
 			errorMessage: "Unauthorized",
@@ -544,14 +544,6 @@ func TestUpdateParentPassword(t *testing.T) {
 			id:         "unknown",
 			tokenGiven: tokenString,
 			statusCode: 400,
-		},
-		{
-			// When parent 2 is using parent 1 token
-			id:           strconv.Itoa(int(2)),
-			updateJSON:   `{"email": "grand@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
-			tokenGiven:   tokenString,
-			statusCode:   401,
-			errorMessage: "Unauthorized",
 		},
 	}
 
@@ -577,7 +569,7 @@ func TestUpdateParentPassword(t *testing.T) {
 		}
 		assert.Equal(t, rr.Code, v.statusCode)
 		if v.statusCode == 200 {
-			token, err := server.ChildSignIn(v.email, v.updatePassword)
+			token, err := server.ParentSignIn(v.email, v.updatePassword)
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			} else {
