@@ -231,6 +231,7 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 	}
 	child := models.Child{}
 	err = json.Unmarshal(body, &data)
+	child.Email = data.Email
 
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -257,20 +258,20 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	child.Prepare()
 	child.Password = data.NewPassword
+	child.Prepare()
 	err = child.Validate("updatepassword")
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	updatedParent, err := child.UpdateChildPassword(server.DB, uint64(uid))
+	childUpdated, err := child.UpdateChildPassword(server.DB, uint64(uid))
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
 	}
-	responses.JSON(w, http.StatusOK, updatedParent)
+	responses.JSON(w, http.StatusOK, childUpdated)
 }
 
 func (server *Server) DeleteChild(w http.ResponseWriter, r *http.Request) {

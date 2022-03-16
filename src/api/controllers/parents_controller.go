@@ -194,10 +194,12 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 	}
 	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", parent.Email).Take(&parent).Error
 	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 	err = models.VerifyPassword(parent.Password, data.OldPassword)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
