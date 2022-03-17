@@ -14,8 +14,15 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/badoux/checkmail"
 	"github.com/gorilla/mux"
 )
+
+type Data struct {
+	Email       string `json:"email"`
+	OldPassword string `json:"oldPassword"`
+	NewPassword string `json:"newPassword"`
+}
 
 func (server *Server) CreateParent(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
@@ -165,11 +172,6 @@ func (server *Server) UpdateParentProfile(w http.ResponseWriter, r *http.Request
 
 func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
-	type Data struct {
-		Email       string `json:"email"`
-		OldPassword string `json:"oldPassword"`
-		NewPassword string `json:"newPassword"`
-	}
 
 	var data Data
 	vars := mux.Vars(r)
@@ -186,20 +188,8 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 	parent := models.Parent{}
 	err = json.Unmarshal(body, &data)
 
-	parent.Email = data.Email
-
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", parent.Email).Take(&parent).Error
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-	err = models.VerifyPassword(parent.Password, data.OldPassword)
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
@@ -213,13 +203,25 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	parent.Password = data.NewPassword
 	parent.Prepare()
-	err = parent.Validate("updatepassword")
+	err = data.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
+	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", data.Email).Take(&parent).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	err = models.VerifyPassword(parent.Password, data.OldPassword)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	parent.Password = data.NewPassword
 	updatedParent, err := parent.UpdateParentPassword(server.DB, uint32(uid))
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
@@ -227,6 +229,22 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	responses.JSON(w, http.StatusOK, updatedParent)
+}
+
+func (data *Data) Validate() error {
+	if data.Email == "" {
+		return errors.New("butuh email")
+	}
+	if err := checkmail.ValidateFormat(data.Email); err != nil {
+		return errors.New("invalid email")
+	}
+	if data.OldPassword == "" {
+		return errors.New("butuh old password")
+	}
+	if data.NewPassword == "" {
+		return errors.New("butuh new password")
+	}
+	return nil
 }
 
 func (server *Server) DeleteParent(w http.ResponseWriter, r *http.Request) {

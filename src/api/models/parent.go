@@ -77,18 +77,6 @@ func (p *Parent) Validate(action string) error {
 		}
 		return nil
 
-	case "updatepassword":
-		if p.Password == "" {
-			return errors.New("butuh password")
-		}
-		if p.Email == "" {
-			return errors.New("butuh email")
-		}
-		if err := checkmail.ValidateFormat(p.Email); err != nil {
-			return errors.New("invalid email")
-		}
-		return nil
-
 	case "updateprofile":
 		if p.Nama == "" {
 			return errors.New("butuh nama")
