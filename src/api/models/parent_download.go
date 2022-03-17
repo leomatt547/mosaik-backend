@@ -67,7 +67,7 @@ func (pd *ParentDownload) FindAllParentDownloads(db *gorm.DB) (*[]ParentDownload
 	}
 	if len(parentdownloads) > 0 {
 		//Dapatkan id Parent
-		for i, _ := range parentdownloads {
+		for i := range parentdownloads {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", parentdownloads[i].ParentID).Take(&parentdownloads[i].Parent).Error
 			if err != nil {
 				return &[]ParentDownload{}, err
@@ -104,7 +104,7 @@ func (pd *ParentDownload) FindParentDownloadsbyParentID(db *gorm.DB, pid uint32)
 	}
 	if len(parentdownloads) > 0 {
 		//Dapatkan id Parent
-		for i, _ := range parentdownloads {
+		for i := range parentdownloads {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", pid).Take(&parentdownloads[i].Parent).Error
 			if err != nil {
 				return &[]ParentDownload{}, err

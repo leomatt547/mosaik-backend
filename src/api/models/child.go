@@ -143,7 +143,7 @@ func (c *Child) FindAllChilds(db *gorm.DB) (*[]Child, error) {
 		return &[]Child{}, err
 	}
 	if len(childs) > 0 {
-		for i, _ := range childs {
+		for i := range childs {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", childs[i].ParentID).Take(&childs[i].Parent).Error
 			if err != nil {
 				return &[]Child{}, err
