@@ -172,8 +172,6 @@ func (server *Server) UpdateParentProfile(w http.ResponseWriter, r *http.Request
 
 func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
-
-	var data Data
 	vars := mux.Vars(r)
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
@@ -185,7 +183,9 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
 	parent := models.Parent{}
+	data := Data{}
 	err = json.Unmarshal(body, &data)
 
 	if err != nil {
