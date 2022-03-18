@@ -12,6 +12,7 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gorilla/mux"
 )
@@ -200,6 +201,67 @@ func (server *Server) UpdateChildProfile(w http.ResponseWriter, r *http.Request)
 	childUpdate.ID = child.ID //this is important to tell the model the child id to update, the other update field are set above
 	childUpdated, err := childUpdate.UpdateChildProfile(server.DB, childUpdate.ID)
 
+	if err != nil {
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		return
+	}
+	responses.JSON(w, http.StatusOK, childUpdated)
+}
+
+func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	vars := mux.Vars(r)
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	child := models.Child{}
+	data := Data{}
+	err = json.Unmarshal(body, &data)
+
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	tokenID, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	if tokenID != uint32(uid) {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+
+	child.Prepare()
+	err = data.Validate()
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", data.Email).Take(&child).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	err = models.VerifyPassword(child.Password, data.OldPassword)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	child.Password = data.NewPassword
+	childUpdated, err := child.UpdateChildPassword(server.DB, uint64(uid))
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
