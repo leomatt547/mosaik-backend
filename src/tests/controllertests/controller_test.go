@@ -90,7 +90,7 @@ func seedParents() ([]models.Parent, error) {
 			Password: "password",
 		},
 	}
-	for i, _ := range parents {
+	for i := range parents {
 		err := server.DB.Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
 			return []models.Parent{}, err
@@ -163,7 +163,7 @@ func seedUrls() error {
 		},
 	}
 
-	for i, _ := range urls {
+	for i := range urls {
 		err := server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			return err
@@ -199,7 +199,7 @@ func seedChildVisitsAndUrls() ([]models.ChildVisit, []models.Url, error) {
 			ChildID:  2,
 		},
 	}
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -246,7 +246,7 @@ func seedParentsAndChildsAndChildVisitsAndUrls() ([]models.Parent, []models.Chil
 		log.Fatalf("cannot seed parents and childs table: %v", err)
 	}
 
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -316,7 +316,7 @@ func seedParentsAndParentvisitsAndUrls() ([]models.Parent, []models.ParentVisit,
 		log.Fatalf("cannot seed parents table: %v", err)
 	}
 
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -359,7 +359,7 @@ func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
 			ParentID: 2,
 		},
 	}
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -393,7 +393,7 @@ func seedParentsAndUrls() ([]models.Parent, []models.Url, error) {
 			Title: "Facebook",
 		},
 	}
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -491,7 +491,7 @@ func seedParentsAndChilds() ([]models.Parent, []models.Child, error) {
 		},
 	}
 
-	for i, _ := range parents {
+	for i := range parents {
 		err = server.DB.Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed parents table: %v", err)

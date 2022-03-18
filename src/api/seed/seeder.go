@@ -139,7 +139,7 @@ func Load(db *gorm.DB) {
 		log.Fatalf("attaching foreign key parent error: %v", err)
 	}
 
-	for i, _ := range parents {
+	for i := range parents {
 		//seeding parent
 		err = db.Debug().Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
@@ -161,7 +161,7 @@ func Load(db *gorm.DB) {
 		}
 	}
 
-	for i, _ := range urls {
+	for i := range urls {
 		err = db.Debug().Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
