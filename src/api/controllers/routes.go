@@ -44,6 +44,12 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/parentdownloads/{id}", middlewares.SetMiddlewareJSON(s.GetParentDownload)).Methods("GET")
 	s.Router.HandleFunc("/parentdownloads/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteParentDownload)).Methods("DELETE")
 
+	//Child Download routes
+	s.Router.HandleFunc("/childdownloads", middlewares.SetMiddlewareJSON(s.CreateChildDownload)).Methods("POST")
+	s.Router.HandleFunc("/childdownloads", middlewares.SetMiddlewareJSON(s.GetChildDownloads)).Methods("GET")
+	s.Router.HandleFunc("/childdownloads/{id}", middlewares.SetMiddlewareJSON(s.GetChildDownload)).Methods("GET")
+	s.Router.HandleFunc("/childdownloads/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteChildDownload)).Methods("DELETE")
+
 	//Url routes
 	s.Router.HandleFunc("/urls", middlewares.SetMiddlewareJSON(s.CreateUrl)).Methods("POST")
 	s.Router.HandleFunc("/urls", middlewares.SetMiddlewareJSON(s.GetUrls)).Methods("GET")
