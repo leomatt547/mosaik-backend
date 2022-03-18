@@ -62,7 +62,7 @@ func (cv *ChildVisit) FindAllChildVisits(db *gorm.DB) (*[]ChildVisit, error) {
 	}
 	if len(childvisits) > 0 {
 		//Dapatkan id Child
-		for i, _ := range childvisits {
+		for i := range childvisits {
 			err := db.Debug().Model(&Child{}).Where("id = ?", childvisits[i].ChildID).Take(&childvisits[i].Child).Error
 			if err != nil {
 				return &[]ChildVisit{}, err
@@ -113,7 +113,7 @@ func (cv *ChildVisit) FindChildVisitsbyChildID(db *gorm.DB, cid uint64) (*[]Chil
 	}
 	if len(childvisits) > 0 {
 		//Dapatkan id Child
-		for i, _ := range childvisits {
+		for i := range childvisits {
 			err := db.Debug().Model(&Child{}).Where("id = ?", cid).Take(&childvisits[i].Child).Error
 			if err != nil {
 				return &[]ChildVisit{}, err

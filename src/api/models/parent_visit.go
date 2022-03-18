@@ -62,7 +62,7 @@ func (pv *ParentVisit) FindAllParentVisits(db *gorm.DB) (*[]ParentVisit, error) 
 	}
 	if len(parentvisits) > 0 {
 		//Dapatkan id Parent
-		for i, _ := range parentvisits {
+		for i := range parentvisits {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", parentvisits[i].ParentID).Take(&parentvisits[i].Parent).Error
 			if err != nil {
 				return &[]ParentVisit{}, err
@@ -109,7 +109,7 @@ func (pv *ParentVisit) FindParentVisitsbyParentID(db *gorm.DB, pid uint32) (*[]P
 	}
 	if len(parentvisits) > 0 {
 		//Dapatkan id Parent
-		for i, _ := range parentvisits {
+		for i := range parentvisits {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", pid).Take(&parentvisits[i].Parent).Error
 			if err != nil {
 				return &[]ParentVisit{}, err
