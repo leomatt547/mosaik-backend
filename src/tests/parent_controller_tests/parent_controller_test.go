@@ -549,7 +549,7 @@ func TestUpdateParentPassword(t *testing.T) {
 
 	for _, v := range samples {
 
-		req, err := http.NewRequest("POST", "/parents", bytes.NewBufferString(v.updateJSON))
+		req, err := http.NewRequest("POST", "/parents/password", bytes.NewBufferString(v.updateJSON))
 		if err != nil {
 			t.Errorf("This is the error: %v\n", err)
 		}

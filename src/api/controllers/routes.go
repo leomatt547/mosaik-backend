@@ -12,16 +12,18 @@ func (s *Server) initializeRoutes() {
 
 	//Parents routes
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.CreateParent)).Methods("POST")
+	s.Router.HandleFunc("/parents/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateParentPassword)).Methods("POST")
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.GetParents)).Methods("GET")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(s.GetParent)).Methods("GET")
-	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateParent))).Methods("PUT")
+	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateParentProfile))).Methods("PUT")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteParent)).Methods("DELETE")
 
 	//Child routes
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.CreateChild)).Methods("POST")
+	s.Router.HandleFunc("/childs/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateChildPassword)).Methods("POST")
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.GetChilds)).Methods("GET")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(s.GetChild)).Methods("GET")
-	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateChild))).Methods("PUT")
+	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateChildProfile))).Methods("PUT")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteChild)).Methods("DELETE")
 
 	//Parent Visit routes
@@ -41,6 +43,12 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/parentdownloads", middlewares.SetMiddlewareJSON(s.GetParentDownloads)).Methods("GET")
 	s.Router.HandleFunc("/parentdownloads/{id}", middlewares.SetMiddlewareJSON(s.GetParentDownload)).Methods("GET")
 	s.Router.HandleFunc("/parentdownloads/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteParentDownload)).Methods("DELETE")
+
+	//Child Download routes
+	s.Router.HandleFunc("/childdownloads", middlewares.SetMiddlewareJSON(s.CreateChildDownload)).Methods("POST")
+	s.Router.HandleFunc("/childdownloads", middlewares.SetMiddlewareJSON(s.GetChildDownloads)).Methods("GET")
+	s.Router.HandleFunc("/childdownloads/{id}", middlewares.SetMiddlewareJSON(s.GetChildDownload)).Methods("GET")
+	s.Router.HandleFunc("/childdownloads/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteChildDownload)).Methods("DELETE")
 
 	//Url routes
 	s.Router.HandleFunc("/urls", middlewares.SetMiddlewareJSON(s.CreateUrl)).Methods("POST")
