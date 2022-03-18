@@ -19,6 +19,7 @@ var childInstance = models.Child{}
 var childVisitInstance = models.ChildVisit{}
 var parentVisitInstance = models.ParentVisit{}
 var parentDownloadInstance = models.ParentDownload{}
+var childDownloadInstance = models.ChildDownload{}
 var urlInstance = models.Url{}
 
 func TestMain(m *testing.M) {
@@ -87,11 +88,11 @@ func refreshParentAndChildTable() error {
 
 func refreshAllTable() error {
 
-	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}, &models.ParentDownload{}).Error
+	err := server.DB.DropTableIfExists(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}).Error
 	if err != nil {
 		return err
 	}
-	err = server.DB.AutoMigrate(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}, &models.ParentDownload{}).Error
+	err = server.DB.AutoMigrate(&models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}).Error
 	if err != nil {
 		return err
 	}
@@ -182,6 +183,26 @@ func seedOneParentDownload() (models.ParentDownload, error) {
 	return parentdownloads, nil
 }
 
+func seedOneChildDownload() (models.ChildDownload, error) {
+	var childdownloads = models.ChildDownload{
+		ID:             1,
+		TargetPath:     "D:/",
+		ReceivedBytes:  300,
+		TotalBytes:     300,
+		SiteUrl:        "www.twitter.com",
+		TabUrl:         "twitter.com/tabURL",
+		TabReferredUrl: "twitter.com/tabURL",
+		MimeType:       "text/html",
+		ChildID:        1,
+	}
+
+	err := server.DB.Model(&models.ChildDownload{}).Create(&childdownloads).Error
+	if err != nil {
+		log.Fatalf("cannot seed Child Download table: %v", err)
+	}
+	return childdownloads, nil
+}
+
 func seedParents() error {
 	parents := []models.Parent{
 		{
@@ -196,7 +217,7 @@ func seedParents() error {
 		},
 	}
 
-	for i, _ := range parents {
+	for i := range parents {
 		err := server.DB.Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
 			return err
@@ -206,16 +227,16 @@ func seedParents() error {
 }
 
 func seedOneParentAndOneChild() (models.Child, error) {
-	err := refreshParentAndChildTable()
-	if err != nil {
-		return models.Child{}, err
-	}
+	// err := refreshParentAndChildTable()
+	// if err != nil {
+	// 	return models.Child{}, err
+	// }
 	parent := models.Parent{
 		Nama:     "Sam Phil",
 		Email:    "sam@gmail.com",
 		Password: "password",
 	}
-	err = server.DB.Model(&models.Parent{}).Create(&parent).Error
+	err := server.DB.Model(&models.Parent{}).Create(&parent).Error
 	if err != nil {
 		return models.Child{}, err
 	}
@@ -264,7 +285,7 @@ func seedParentsAndChilds() ([]models.Parent, []models.Child, error) {
 		},
 	}
 
-	for i, _ := range parents {
+	for i := range parents {
 		err = server.DB.Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed Parents table: %v", err)
@@ -307,7 +328,7 @@ func seedChildVisitsAndUrls() ([]models.ChildVisit, []models.Url, error) {
 			ChildID:  2,
 		},
 	}
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -349,13 +370,49 @@ func seedParentDownloads() ([]models.ParentDownload, error) {
 			ParentID:       2,
 		},
 	}
-	for i, _ := range parentdownloads {
+	for i := range parentdownloads {
 		err = server.DB.Model(&models.ParentDownload{}).Create(&parentdownloads[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed Parent Downloads table: %v", err)
 		}
 	}
 	return parentdownloads, nil
+}
+
+func seedChildDownloads() ([]models.ChildDownload, error) {
+	var err error
+	if err != nil {
+		return []models.ChildDownload{}, err
+	}
+	var childdownloads = []models.ChildDownload{
+		{
+			TargetPath:     "D:/",
+			ReceivedBytes:  1000,
+			TotalBytes:     1000,
+			SiteUrl:        "www.twitter.com",
+			TabUrl:         "twitter.com/tabURL",
+			TabReferredUrl: "twitter.com/tabURL",
+			MimeType:       "text/html",
+			ChildID:        1,
+		},
+		{
+			TargetPath:     "C:/",
+			ReceivedBytes:  2000,
+			TotalBytes:     2000,
+			SiteUrl:        "www.twitter.com",
+			TabUrl:         "twitter.com/tabURL",
+			TabReferredUrl: "twitter.com/tabURL",
+			MimeType:       "text/html",
+			ChildID:        2,
+		},
+	}
+	for i := range childdownloads {
+		err = server.DB.Model(&models.ChildDownload{}).Create(&childdownloads[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed Child Downloads table: %v", err)
+		}
+	}
+	return childdownloads, nil
 }
 
 func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
@@ -385,7 +442,7 @@ func seedParentVisitsAndUrls() ([]models.ParentVisit, []models.Url, error) {
 			ParentID: 2,
 		},
 	}
-	for i, _ := range urls {
+	for i := range urls {
 		err = server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
@@ -412,7 +469,7 @@ func seedUrls() error {
 		},
 	}
 
-	for i, _ := range urls {
+	for i := range urls {
 		err := server.DB.Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			return err

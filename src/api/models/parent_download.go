@@ -14,7 +14,7 @@ type ParentDownload struct {
 	TotalBytes     uint64    `gorm:"type:bigint; not null;" json:"total_bytes"`
 	SiteUrl        string    `gorm:"type:text;not null;" json:"site_url"`
 	TabUrl         string    `gorm:"type:text;not null;" json:"tab_url"`
-	TabReferredUrl string    `gorm:"type:text;not null;" json:"tab_referred_url"`
+	TabReferredUrl string    `gorm:"type:text;" json:"tab_referred_url"`
 	MimeType       string    `gorm:"type:varchar(255);not null;" json:"mime_type"`
 	ParentID       uint32    `gorm:"not null" json:"parent_id"`
 	Parent         Parent    `json:"Parent"`
@@ -31,9 +31,6 @@ func (pd *ParentDownload) Validate() error {
 	}
 	if pd.TabUrl == "" {
 		return errors.New("butuh tab_url")
-	}
-	if pd.TabReferredUrl == "" {
-		return errors.New("butuh tab_referred_url")
 	}
 	if pd.MimeType == "" {
 		return errors.New("butuh mime_type")
@@ -70,7 +67,7 @@ func (pd *ParentDownload) FindAllParentDownloads(db *gorm.DB) (*[]ParentDownload
 	}
 	if len(parentdownloads) > 0 {
 		//Dapatkan id Parent
-		for i, _ := range parentdownloads {
+		for i := range parentdownloads {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", parentdownloads[i].ParentID).Take(&parentdownloads[i].Parent).Error
 			if err != nil {
 				return &[]ParentDownload{}, err
@@ -107,7 +104,7 @@ func (pd *ParentDownload) FindParentDownloadsbyParentID(db *gorm.DB, pid uint32)
 	}
 	if len(parentdownloads) > 0 {
 		//Dapatkan id Parent
-		for i, _ := range parentdownloads {
+		for i := range parentdownloads {
 			err := db.Debug().Model(&Parent{}).Where("id = ?", pid).Take(&parentdownloads[i].Parent).Error
 			if err != nil {
 				return &[]ParentDownload{}, err
