@@ -15,7 +15,7 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/parents/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateParentPassword)).Methods("POST")
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.GetParents)).Methods("GET")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(s.GetParent)).Methods("GET")
-	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateParent))).Methods("PUT")
+	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateParentProfile))).Methods("PUT")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteParent)).Methods("DELETE")
 
 	//Child routes
@@ -23,7 +23,7 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/childs/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateChildPassword)).Methods("POST")
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.GetChilds)).Methods("GET")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(s.GetChild)).Methods("GET")
-	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateChild))).Methods("PUT")
+	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateChildProfile))).Methods("PUT")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteChild)).Methods("DELETE")
 
 	//Parent Visit routes

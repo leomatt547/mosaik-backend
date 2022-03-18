@@ -126,11 +126,11 @@ func refreshUrlTable() error {
 }
 
 func refreshAllTable() error {
-	err := server.DB.DropTableIfExists(&models.ParentDownload{}, &models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
+	err := server.DB.DropTableIfExists(&models.ParentDownload{}, &models.ChildDownload{}, &models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
 	if err != nil {
 		return err
 	}
-	err = server.DB.AutoMigrate(&models.ParentDownload{}, &models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
+	err = server.DB.AutoMigrate(&models.ParentDownload{}, &models.ChildDownload{}, &models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
 	if err != nil {
 		return err
 	}
