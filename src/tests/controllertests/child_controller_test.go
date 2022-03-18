@@ -3,6 +3,7 @@ package controllertests
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -475,6 +476,158 @@ func TestUpdateChildProfile(t *testing.T) {
 			assert.Equal(t, responseMap["nama"], v.nama)
 			assert.Equal(t, responseMap["email"], v.email)
 			assert.Equal(t, responseMap["parent_id"], float64(v.parent_id)) //just to match the type of the json we receive thats why we used float64
+		}
+		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
+			assert.Equal(t, responseMap["error"], v.errorMessage)
+		}
+	}
+}
+
+func TestUpdateChildPassword(t *testing.T) {
+
+	var ParentEmail, ParentPassword string
+	var AuthParentID uint32
+	var AuthChildID uint64
+
+	err := refreshParentAndChildTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parents, childs, err := seedParentsAndChilds() //we need atleast two parents to properly check the update
+	if err != nil {
+		log.Fatalf("Error seeding parent: %v\n", err)
+	}
+	// Get only the first parent
+	for _, parent := range parents {
+		if parent.ID == 2 {
+			continue
+		}
+		ParentEmail = parent.Email
+		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
+	}
+	//Login the parent and get the authentication token
+	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	if err != nil {
+		log.Fatalf("cannot login: %v\n", err)
+	}
+	tokenString := fmt.Sprintf("Bearer %v", token)
+
+	// Get only the first child
+	for _, child := range childs {
+		if child.ID == 2 {
+			continue
+		}
+		AuthChildID = child.ID
+		AuthParentID = child.ParentID
+	}
+
+	samples := []struct {
+		id             string
+		updateJSON     string
+		statusCode     int
+		email          string
+		updatePassword string
+		parent_id      uint32
+		tokenGiven     string
+		errorMessage   string
+	}{
+		{
+			// Convert int32 to int first before converting to string
+			id:             strconv.Itoa(int(AuthChildID)),
+			updateJSON:     `{"email": "steven_jr@gmail.com", "oldPassword": "password", "newPassword": "newpassword", "parent_id": 1}`,
+			statusCode:     200,
+			email:          "steven_jr@gmail.com",
+			updatePassword: "newpassword",
+			parent_id:      AuthParentID,
+			tokenGiven:     tokenString,
+			errorMessage:   "",
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"email": "steven_jr@gmail.com", "oldPassword": "", "newPassword": "newpassword", "parent_id": 1}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh old password",
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"email": "steven_jr@gmail.com", "oldPassword": "password", "newPassword": "", "parent_id": 1}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh new password",
+		},
+		{
+			// When no token was passed
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"email": "steven_jr@gmail.com", "oldPassword": "password", "newPassword": "newpassword", "parent_id": 1}`,
+			statusCode:   401,
+			tokenGiven:   "",
+			errorMessage: "Unauthorized",
+		},
+		{
+			// When incorrect token was passed
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"email": "steven_jr@gmail.com", "oldPassword": "password", "newPassword": "newpassword",  "parent_id": 1}`,
+			statusCode:   401,
+			tokenGiven:   "This is incorrect token",
+			errorMessage: "Unauthorized",
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID)),
+			updateJSON:   `{"email": "", "oldPassword": "password", "newPassword": "newpassword", "parent_id": 1}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh email",
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID + 1)),
+			updateJSON:   `{"email": "steven_jr@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			statusCode:   401,
+			tokenGiven:   tokenString,
+			errorMessage: "Unauthorized",
+		},
+		{
+			id:         "unknown",
+			statusCode: 400,
+		},
+		{
+			id:           strconv.Itoa(int(AuthChildID + 1)),
+			updateJSON:   `{"email": "steven_jr@gmail.com", "oldPassword": "password", "newPassword": "newpassword",  "parent_id": 1}`,
+			tokenGiven:   tokenString,
+			statusCode:   401,
+			errorMessage: "Unauthorized",
+		},
+	}
+
+	for _, v := range samples {
+
+		req, err := http.NewRequest("POST", "/childs", bytes.NewBufferString(v.updateJSON))
+		if err != nil {
+			t.Errorf("This is the error: %v\n", err)
+		}
+		req = mux.SetURLVars(req, map[string]string{"id": v.id})
+
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(server.UpdateChildPassword)
+
+		req.Header.Set("Authorization", v.tokenGiven)
+
+		handler.ServeHTTP(rr, req)
+
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			t.Errorf("Cannot convert to json: %v", err)
+		}
+		assert.Equal(t, rr.Code, v.statusCode)
+		if v.statusCode == 200 {
+			token, err := server.ChildSignIn(v.email, v.updatePassword)
+			if err != nil {
+				assert.Equal(t, err, errors.New(v.errorMessage))
+			} else {
+				assert.NotEqual(t, token, "")
+				assert.Equal(t, responseMap["parent_id"], float64(v.parent_id))
+			}
 		}
 		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
 			assert.Equal(t, responseMap["error"], v.errorMessage)

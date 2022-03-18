@@ -3,6 +3,7 @@ package controllertests
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -447,6 +448,133 @@ func TestUpdateParentProfile(t *testing.T) {
 		if v.statusCode == 200 {
 			assert.Equal(t, responseMap["nama"], v.updateNama)
 			assert.Equal(t, responseMap["email"], v.updateEmail)
+		}
+		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
+			assert.Equal(t, responseMap["error"], v.errorMessage)
+		}
+	}
+}
+
+func TestUpdateParentPassword(t *testing.T) {
+
+	var AuthEmail, AuthPassword string
+	var AuthID uint32
+
+	err := refreshParentTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	parents, err := seedParents() //we need atleast two parents to properly check the update
+	if err != nil {
+		log.Fatalf("Error seeding parent: %v\n", err)
+	}
+	// Get only the first parent
+	for _, parent := range parents {
+		if parent.ID == 2 {
+			continue
+		}
+		AuthID = parent.ID
+		AuthEmail = parent.Email
+		AuthPassword = "password" //Note the password in the database is already hashed, we want unhashed
+	}
+	//Login the parent and get the authentication token
+	token, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	if err != nil {
+		log.Fatalf("cannot login parent: %v\n", err)
+	}
+	tokenString := fmt.Sprintf("Bearer %v", token)
+
+	samples := []struct {
+		id             string
+		updateJSON     string
+		statusCode     int
+		email          string
+		updatePassword string
+		tokenGiven     string
+		errorMessage   string
+	}{
+		{
+			// Convert int32 to int first before converting to string
+			id:             strconv.Itoa(int(AuthID)),
+			updateJSON:     `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			statusCode:     200,
+			email:          "steven@gmail.com",
+			updatePassword: "newpassword",
+			tokenGiven:     tokenString,
+			errorMessage:   "",
+		},
+		{
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "", "newPassword": "newpassword"}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh old password",
+		},
+		{
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": ""}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh new password",
+		},
+		{
+			// When no token was passed
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			statusCode:   401,
+			tokenGiven:   "",
+			errorMessage: "Unauthorized",
+		},
+		{
+			// When incorrect token was passed
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			statusCode:   401,
+			tokenGiven:   "This is incorrect token",
+			errorMessage: "Unauthorized",
+		},
+		{
+			id:           strconv.Itoa(int(AuthID)),
+			updateJSON:   `{"email": "", "oldPassword": "password", "newPassword": "newpassword"}`,
+			statusCode:   422,
+			tokenGiven:   tokenString,
+			errorMessage: "butuh email",
+		},
+		{
+			id:         "unknown",
+			tokenGiven: tokenString,
+			statusCode: 400,
+		},
+	}
+
+	for _, v := range samples {
+
+		req, err := http.NewRequest("POST", "/parents", bytes.NewBufferString(v.updateJSON))
+		if err != nil {
+			t.Errorf("This is the error: %v\n", err)
+		}
+		req = mux.SetURLVars(req, map[string]string{"id": v.id})
+
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(server.UpdateParentPassword)
+
+		req.Header.Set("Authorization", v.tokenGiven)
+
+		handler.ServeHTTP(rr, req)
+
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			t.Errorf("Cannot convert to json: %v", err)
+		}
+		assert.Equal(t, rr.Code, v.statusCode)
+		if v.statusCode == 200 {
+			token, err := server.ParentSignIn(v.email, v.updatePassword)
+			if err != nil {
+				assert.Equal(t, err, errors.New(v.errorMessage))
+			} else {
+				assert.NotEqual(t, token, "")
+			}
 		}
 		if v.statusCode == 401 || v.statusCode == 422 || v.statusCode == 500 && v.errorMessage != "" {
 			assert.Equal(t, responseMap["error"], v.errorMessage)
