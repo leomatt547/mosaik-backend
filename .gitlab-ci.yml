@@ -17,11 +17,12 @@ before_script:
   - go get github.com/go-playground/assert
 
 stages:
-  - test
+  - model tests
+  - controller tests
   - build
 
-test model:
-  stage: test
+model tests:
+  stage: model tests
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
@@ -29,13 +30,31 @@ test model:
     - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests
     - go test -v
 
-test controller:
-  stage: test
+parent controller tests:
+  stage: controller tests
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/parent_controller_tests
+    - go test -v
+
+child controller tests:
+  stage: controller tests
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/src/tests/child_controller_tests
+    - go test -v
+
+other controller tests:
+  stage: controller tests
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/src/tests/other_controller_tests
     - go test -v
 
 build:
