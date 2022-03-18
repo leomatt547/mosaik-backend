@@ -23,7 +23,7 @@ var childDownloadInstance = models.ChildDownload{}
 var urlInstance = models.Url{}
 
 func TestMain(m *testing.M) {
-	err := godotenv.Load(os.ExpandEnv("../../../.env"))
+	err := godotenv.Load(os.ExpandEnv("../../../../.env"))
 	if err != nil {
 		log.Fatalf("Error getting env %v\n", err)
 	}
