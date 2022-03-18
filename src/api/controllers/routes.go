@@ -12,6 +12,7 @@ func (s *Server) initializeRoutes() {
 
 	//Parents routes
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.CreateParent)).Methods("POST")
+	s.Router.HandleFunc("/parents/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateParentPassword)).Methods("POST")
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.GetParents)).Methods("GET")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(s.GetParent)).Methods("GET")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateParent))).Methods("PUT")
@@ -19,6 +20,7 @@ func (s *Server) initializeRoutes() {
 
 	//Child routes
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.CreateChild)).Methods("POST")
+	s.Router.HandleFunc("/childs/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateChildPassword)).Methods("POST")
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.GetChilds)).Methods("GET")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(s.GetChild)).Methods("GET")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateChild))).Methods("PUT")
