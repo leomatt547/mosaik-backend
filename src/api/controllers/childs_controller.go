@@ -211,13 +211,6 @@ func (server *Server) UpdateChildProfile(w http.ResponseWriter, r *http.Request)
 
 func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
-	type Data struct {
-		Email       string `json:"email"`
-		OldPassword string `json:"oldPassword"`
-		NewPassword string `json:"newPassword"`
-	}
-
-	var data Data
 	vars := mux.Vars(r)
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
@@ -229,22 +222,13 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
 	child := models.Child{}
+	data := Data{}
 	err = json.Unmarshal(body, &data)
-	child.Email = data.Email
 
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", data.Email).Take(&child).Error
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-	err = models.VerifyPassword(child.Password, data.OldPassword)
-	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
@@ -258,13 +242,25 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	child.Password = data.NewPassword
 	child.Prepare()
-	err = child.Validate("updatepassword")
+	err = data.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
+	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", data.Email).Take(&child).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	err = models.VerifyPassword(child.Password, data.OldPassword)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	child.Password = data.NewPassword
 	childUpdated, err := child.UpdateChildPassword(server.DB, uint64(uid))
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
