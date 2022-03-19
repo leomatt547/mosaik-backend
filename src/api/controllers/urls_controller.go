@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
@@ -13,6 +14,10 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+type NSFW struct {
+	url string `json:"url"`
+}
 
 func (server *Server) CreateUrl(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
@@ -64,4 +69,58 @@ func (server *Server) GetUrl(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responses.JSON(w, http.StatusOK, urlGotten)
+}
+
+func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	// vars := mux.Vars(r)
+	// uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+	var kalimat []string
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	// parent := models.Parent{}
+	nsfw := NSFW{}
+	err = json.Unmarshal(body, &nsfw)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	kalimat = append(kalimat, "Parsing : "+nsfw.url)
+	// log.Println("Parsing : ", nsfw.url)
+
+	// Request the HTML page.
+	resp, err := http.Get(nsfw.url)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		responses.ERROR(w, resp.StatusCode, err)
+		return
+	}
+
+	htmlData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	imageRegExp := regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
+
+	subMatchSlice := imageRegExp.FindAllStringSubmatch(string(htmlData), -1)
+	for _, item := range subMatchSlice {
+		kalimat = append(kalimat, "Image found : "+item[1])
+		// log.Println("Image found : ", item[1])
+	}
+	responses.JSON(w, http.StatusOK, "")
 }

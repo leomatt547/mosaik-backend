@@ -18,7 +18,7 @@ var server = controllers.Server{}
 // var childInstance = models.Child{}
 
 func TestMain(m *testing.M) {
-	err := godotenv.Load(os.ExpandEnv("../../../../.env"))
+	err := godotenv.Load(os.ExpandEnv("../../../.env"))
 	if err != nil {
 		log.Fatalf("Error getting env %v\n", err)
 	}

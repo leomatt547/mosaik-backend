@@ -15,37 +15,20 @@ before_script:
   - go get -v -u github.com/badoux/checkmail
   - go get -v -u golang.org/x/crypto/bcrypt
   - go get github.com/go-playground/assert
+  - go get -v -u github.com/galeone/tfgo
 
 stages:
   - model tests
   - controller tests
   - build
 
-parent model tests:
+model tests:
   stage: model tests
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/parent_model_tests
-    - go test -v
-
-child model tests:
-  stage: model tests
-  script:
-    - mkdir -p $GOPATH/src/$REPO_NAME
-    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
-    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/child_model_tests
-    - go test -v
-
-other model tests:
-  stage: model tests
-  script:
-    - mkdir -p $GOPATH/src/$REPO_NAME
-    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
-    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/other_model_tests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests
     - go test -v
 
 parent controller tests:
@@ -54,7 +37,7 @@ parent controller tests:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/parent_controller_tests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/parent_controller_tests
     - go test -v
 
 child controller tests:
@@ -63,7 +46,7 @@ child controller tests:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/child_controller_tests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/child_controller_tests
     - go test -v
 
 other controller tests:
@@ -72,7 +55,7 @@ other controller tests:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/other_controller_tests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/other_controller_tests
     - go test -v
 
 build:
