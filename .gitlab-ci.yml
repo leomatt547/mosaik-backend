@@ -15,6 +15,7 @@ before_script:
   - go get -v -u github.com/badoux/checkmail
   - go get -v -u golang.org/x/crypto/bcrypt
   - go get github.com/go-playground/assert
+  - go get -v -u github.com/galeone/tfgo
 
 stages:
   - model tests
