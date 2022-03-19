@@ -15,10 +15,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.5.0 // indirect
-	github.com/galeone/tfgo v0.0.0-20210914072119-caabdf830ee3 // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/lib/pq v1.1.1 // indirect
 )
-
-require cloud.google.com/go/vision v1.2.0
