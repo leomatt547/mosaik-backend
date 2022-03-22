@@ -77,12 +77,6 @@ func (p *Parent) Validate(action string) error {
 		}
 		return nil
 
-	case "updatepassword":
-		if p.Password == "" {
-			return errors.New("butuh password")
-		}
-		return nil
-
 	case "updateprofile":
 		if p.Nama == "" {
 			return errors.New("butuh nama")

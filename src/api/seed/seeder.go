@@ -73,22 +73,70 @@ var parentvisits = []models.ParentVisit{
 	},
 }
 
+var parentdownloads = []models.ParentDownload{
+	{
+		TargetPath:     "D:/",
+		ReceivedBytes:  100,
+		TotalBytes:     100,
+		SiteUrl:        "www.google.com",
+		TabUrl:         "google.com/tabURL",
+		TabReferredUrl: "google.com/tabRefferedURL",
+		MimeType:       "text/html",
+		ParentID:       1,
+	},
+	{
+		TargetPath:     "C:/",
+		ReceivedBytes:  200,
+		TotalBytes:     200,
+		SiteUrl:        "www.facebook.com",
+		TabUrl:         "facebook.com/tabURL",
+		TabReferredUrl: "facebook.com/tabReferredURL",
+		MimeType:       "text/html",
+		ParentID:       2,
+	},
+}
+
+var childdownloads = []models.ChildDownload{
+	{
+		TargetPath:     "D:/",
+		ReceivedBytes:  100,
+		TotalBytes:     100,
+		SiteUrl:        "www.google.com",
+		TabUrl:         "google.com/tabURL",
+		TabReferredUrl: "google.com/tabRefferedURL",
+		MimeType:       "text/html",
+		ChildID:        1,
+	},
+	{
+		TargetPath:     "C:/",
+		ReceivedBytes:  200,
+		TotalBytes:     200,
+		SiteUrl:        "www.facebook.com",
+		TabUrl:         "facebook.com/tabURL",
+		TabReferredUrl: "facebook.com/tabReferredURL",
+		MimeType:       "text/html",
+		ChildID:        2,
+	},
+}
+
 func Load(db *gorm.DB) {
-	err := db.Debug().DropTableIfExists(&models.Child{}, &models.Parent{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}).Error
+	err := db.Debug().DropTableIfExists(&models.Child{}, &models.Parent{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v", err)
 	}
-	err = db.Debug().AutoMigrate(&models.Parent{}, &models.Child{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}).Error
+
+	err = db.Debug().AutoMigrate(&models.Parent{}, &models.Child{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}).Error
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v", err)
 	}
 
-	//Adding Foreign Key
+	//Adding Foreign Key Child
 	err = db.Debug().Model(&models.Child{}).AddForeignKey("parent_id", "parents(id)", "cascade", "cascade").Error
 	if err != nil {
 		log.Fatalf("attaching foreign key parent error: %v", err)
 	}
 
+	//Foreign Key History
 	err = db.Debug().Model(&models.ChildVisit{}).AddForeignKey("child_id", "children(id)", "cascade", "cascade").Error
 	if err != nil {
 		log.Fatalf("attaching foreign key child error: %v", err)
@@ -99,25 +147,58 @@ func Load(db *gorm.DB) {
 		log.Fatalf("attaching foreign key url error: %v", err)
 	}
 
+	err = db.Debug().Model(&models.ParentVisit{}).AddForeignKey("parent_id", "parents(id)", "cascade", "cascade").Error
+	if err != nil {
+		log.Fatalf("attaching foreign key parent error: %v", err)
+	}
+
 	err = db.Debug().Model(&models.ParentVisit{}).AddForeignKey("url_id", "urls(id)", "cascade", "cascade").Error
 	if err != nil {
 		log.Fatalf("attaching foreign key url error: %v", err)
 	}
 
-	for i, _ := range parents {
+	//Foreign Key Download Parent
+	err = db.Debug().Model(&models.ParentDownload{}).AddForeignKey("parent_id", "parents(id)", "cascade", "cascade").Error
+	if err != nil {
+		log.Fatalf("attaching foreign key parent error: %v", err)
+	}
+
+	//Foreign Key Download Child
+	err = db.Debug().Model(&models.ChildDownload{}).AddForeignKey("child_id", "children(id)", "cascade", "cascade").Error
+	if err != nil {
+		log.Fatalf("attaching foreign key child error: %v", err)
+	}
+
+	for i := range parents {
+		//seeding parent
 		err = db.Debug().Model(&models.Parent{}).Create(&parents[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed parents table: %v", err)
 		}
 		childs[i].ParentID = parents[i].ID
 
+		//seeding child
 		err = db.Debug().Model(&models.Child{}).Create(&childs[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed childs table: %v", err)
 		}
+
+		//seeding parent download
+		parentdownloads[i].ParentID = parents[i].ID
+		err = db.Debug().Model(&models.ParentDownload{}).Create(&parentdownloads[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed parent_downloads table: %v", err)
+		}
+
+		//seeding child download
+		childdownloads[i].ChildID = childs[i].ID
+		err = db.Debug().Model(&models.ChildDownload{}).Create(&childdownloads[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed child_downloads table: %v", err)
+		}
 	}
 
-	for i, _ := range urls {
+	for i := range urls {
 		err = db.Debug().Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)

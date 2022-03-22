@@ -1,4 +1,4 @@
-image: golang:1.17
+image: golang:1.18
 
 variables:
   REPO_NAME: gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend
@@ -17,25 +17,62 @@ before_script:
   - go get github.com/go-playground/assert
 
 stages:
-  - test
+  - model tests
+  - controller tests
   - build
 
-test model:
-  stage: test
+parent model tests:
+  stage: model tests
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/parent_model_tests
     - go test -v
 
-test controller:
-  stage: test
+child model tests:
+  stage: model tests
   script:
     - mkdir -p $GOPATH/src/$REPO_NAME
     - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
-    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests
+    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/child_model_tests
+    - go test -v
+
+other model tests:
+  stage: model tests
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/other_model_tests
+    - go test -v
+
+parent controller tests:
+  stage: controller tests
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/parent_controller_tests
+    - go test -v
+
+child controller tests:
+  stage: controller tests
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/child_controller_tests
+    - go test -v
+
+other controller tests:
+  stage: controller tests
+  script:
+    - mkdir -p $GOPATH/src/$REPO_NAME
+    - mv $CI_PROJECT_DIR/.env $GOPATH/src/$REPO_NAME/
+    - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
+    - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/other_controller_tests
     - go test -v
 
 build:

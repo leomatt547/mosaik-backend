@@ -16,7 +16,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (server *Server) CreateChildVisit(w http.ResponseWriter, r *http.Request) {
+func (server *Server) CreateChildDownload(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	//POST variabel butuh ChildID; URL; Title
 	body, err := ioutil.ReadAll(r.Body)
@@ -24,33 +24,27 @@ func (server *Server) CreateChildVisit(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	childvisit := models.ChildVisit{}
-	err = json.Unmarshal(body, &childvisit)
+	childdownload := models.ChildDownload{}
+	err = json.Unmarshal(body, &childdownload)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = childvisit.Validate()
+	err = childdownload.Validate()
 	if err != nil {
-		//dapatkan url id
-		url_id, err2 := childvisit.Url.FindRecordByUrl(server.DB, childvisit.Url.Url)
-		childvisit.UrlID = url_id.ID
-		err = childvisit.Validate()
-		if err2 != nil {
-			responses.ERROR(w, http.StatusUnprocessableEntity, err)
-			return
-		}
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
 	}
 	uid, err := auth.ExtractTokenChildID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	if uid != childvisit.ChildID {
+	if uid != childdownload.ChildID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
 	}
-	childCreated, err := childvisit.SaveChildVisit(server.DB)
+	childCreated, err := childdownload.SaveChildDownload(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
@@ -60,15 +54,15 @@ func (server *Server) CreateChildVisit(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, childCreated)
 }
 
-func (server *Server) GetChildVisits(w http.ResponseWriter, r *http.Request) {
+func (server *Server) GetChildDownloads(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := r.URL.Query().Get("child_id")
 	cid, err := strconv.ParseUint(vars, 10, 64)
 	if err != nil {
 		//minta seluruhnya
-		childvisit := models.ChildVisit{}
+		childdownload := models.ChildDownload{}
 
-		childs, err := childvisit.FindAllChildVisits(server.DB)
+		childs, err := childdownload.FindAllChildDownloads(server.DB)
 		if err != nil {
 			responses.ERROR(w, http.StatusInternalServerError, err)
 			return
@@ -76,9 +70,9 @@ func (server *Server) GetChildVisits(w http.ResponseWriter, r *http.Request) {
 		responses.JSON(w, http.StatusOK, childs)
 	} else {
 		//query child_id diterima
-		childvisit := models.ChildVisit{}
+		childdownload := models.ChildDownload{}
 
-		childs, err2 := childvisit.FindChildVisitsbyChildID(server.DB, cid)
+		childs, err2 := childdownload.FindChildDownloadsbyChildID(server.DB, cid)
 		if err2 != nil {
 			responses.ERROR(w, http.StatusInternalServerError, err2)
 			return
@@ -87,7 +81,7 @@ func (server *Server) GetChildVisits(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (server *Server) GetChildVisit(w http.ResponseWriter, r *http.Request) {
+func (server *Server) GetChildDownload(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
 	pid, err := strconv.ParseUint(vars["id"], 10, 64)
@@ -95,9 +89,9 @@ func (server *Server) GetChildVisit(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	childvisit := models.ChildVisit{}
+	childdownload := models.ChildDownload{}
 
-	childReceived, err := childvisit.FindChildVisitByID(server.DB, pid)
+	childReceived, err := childdownload.FindChildDownloadByID(server.DB, pid)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -105,12 +99,12 @@ func (server *Server) GetChildVisit(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, childReceived)
 }
 
-func (server *Server) DeleteChildVisit(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeleteChildDownload(w http.ResponseWriter, r *http.Request) {
 	//PERHATIAN: Hanya Parent yang Bisa Hapus!
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
 
-	// Is a valid child visit id given to us?
+	// Is a valid child download id given to us?
 	pid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -125,27 +119,27 @@ func (server *Server) DeleteChildVisit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the child exist
-	childvisit := models.ChildVisit{}
-	err = server.DB.Debug().Model(models.ChildVisit{}).Where("id = ?", pid).Take(&childvisit).Error
+	childdownload := models.ChildDownload{}
+	err = server.DB.Debug().Model(models.ChildDownload{}).Where("id = ?", pid).Take(&childdownload).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusNotFound, errors.New("Unauthorized"))
 		return
 	}
 
 	child := models.Child{}
-	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", childvisit.ChildID).Take(&child).Error
+	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", childdownload.ChildID).Take(&child).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusNotFound, errors.New("Unauthorized"))
 		return
 	}
 
-	childvisit.Child = child
+	childdownload.Child = child
 	// Is the authenticated user, the owner of this child?
-	if uid != childvisit.Child.ParentID {
+	if uid != childdownload.Child.ParentID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	_, err = childvisit.DeleteAChildVisit(server.DB, pid)
+	_, err = childdownload.DeleteAChildDownload(server.DB, pid)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
