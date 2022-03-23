@@ -14,12 +14,10 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/badoux/checkmail"
 	"github.com/gorilla/mux"
 )
 
 type Data struct {
-	Email       string `json:"email"`
 	OldPassword string `json:"oldPassword"`
 	NewPassword string `json:"newPassword"`
 }
@@ -210,11 +208,11 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = server.DB.Debug().Model(models.Parent{}).Where("email = ?", data.Email).Take(&parent).Error
+	err = server.DB.Debug().Model(models.Parent{}).Where("id = ?", uid).Take(&parent).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
 	}
+
 	err = models.VerifyPassword(parent.Password, data.OldPassword)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
@@ -232,12 +230,6 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 }
 
 func (data *Data) Validate() error {
-	if data.Email == "" {
-		return errors.New("butuh email")
-	}
-	if err := checkmail.ValidateFormat(data.Email); err != nil {
-		return errors.New("invalid email")
-	}
 	if data.OldPassword == "" {
 		return errors.New("butuh old password")
 	}

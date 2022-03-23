@@ -212,7 +212,7 @@ func (server *Server) UpdateChildProfile(w http.ResponseWriter, r *http.Request)
 func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
-	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	uid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -249,11 +249,11 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", data.Email).Take(&child).Error
+	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", uid).Take(&child).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
 	}
+
 	err = models.VerifyPassword(child.Password, data.OldPassword)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
