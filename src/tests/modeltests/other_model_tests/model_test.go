@@ -21,6 +21,7 @@ var parentVisitInstance = models.ParentVisit{}
 var parentDownloadInstance = models.ParentDownload{}
 var childDownloadInstance = models.ChildDownload{}
 var urlInstance = models.Url{}
+var nsfwUrlInstance = models.NSFWUrl{}
 
 func TestMain(m *testing.M) {
 	err := godotenv.Load(os.ExpandEnv("../../../../.env"))
@@ -70,6 +71,19 @@ func refreshUrlTable() error {
 		return err
 	}
 	log.Printf("Successfully refreshed table Url")
+	return nil
+}
+
+func refreshNSFWUrlTable() error {
+	err := server.DB.DropTableIfExists(&models.NSFWUrl{}).Error
+	if err != nil {
+		return err
+	}
+	err = server.DB.AutoMigrate(&models.NSFWUrl{}).Error
+	if err != nil {
+		return err
+	}
+	log.Printf("Successfully refreshed table NSFW Url")
 	return nil
 }
 
@@ -131,6 +145,21 @@ func seedOneUrl() (models.Url, error) {
 		log.Fatalf("cannot seed Urls table: %v", err)
 	}
 	return url, nil
+}
+
+func seedOneNSFWUrl() (models.NSFWUrl, error) {
+
+	refreshNSFWUrlTable()
+
+	nsfw_url := models.NSFWUrl{
+		Url: "www.pornhub.com",
+	}
+
+	err := server.DB.Model(&models.NSFWUrl{}).Create(&nsfw_url).Error
+	if err != nil {
+		log.Fatalf("cannot seed NSFW Url table: %v", err)
+	}
+	return nsfw_url, nil
 }
 
 func seedOneChildVisit() (models.ChildVisit, error) {
@@ -466,6 +495,25 @@ func seedUrls() error {
 		{
 			Url:   "www.facebook.com",
 			Title: "Facebook",
+		},
+	}
+
+	for i := range urls {
+		err := server.DB.Model(&models.Url{}).Create(&urls[i]).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func seedNSFWUrls() error {
+	var urls = []models.Url{
+		{
+			Url: "www.pornhub.com",
+		},
+		{
+			Url: "www.xxxvideos.com",
 		},
 	}
 

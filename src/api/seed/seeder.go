@@ -120,12 +120,12 @@ var childdownloads = []models.ChildDownload{
 }
 
 func Load(db *gorm.DB) {
-	err := db.Debug().DropTableIfExists(&models.Child{}, &models.Parent{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}).Error
+	err := db.Debug().DropTableIfExists(&models.Child{}, &models.Parent{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}, &models.NSFWUrl{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v", err)
 	}
 
-	err = db.Debug().AutoMigrate(&models.Parent{}, &models.Child{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}).Error
+	err = db.Debug().AutoMigrate(&models.Parent{}, &models.Child{}, &models.Url{}, &models.ChildVisit{}, &models.ParentVisit{}, &models.ParentDownload{}, &models.ChildDownload{}, &models.NSFWUrl{}).Error
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v", err)
 	}

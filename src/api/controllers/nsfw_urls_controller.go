@@ -86,72 +86,104 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 	}
 
 	nsfw := models.NSFWUrl{}
+
 	err = json.Unmarshal(body, &nsfw)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	// Request the HTML page.
-	resp, err := http.Get(nsfw.Url)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		responses.ERROR(w, resp.StatusCode, err)
-		return
-	}
-
-	htmlData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	imageRegExp := regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
-
 	hasil_final := Result{}
 	hasil_final.URL = nsfw.Url
-	subMatchSlice := imageRegExp.FindAllStringSubmatch(string(htmlData), -1)
-	for _, item := range subMatchSlice {
-		//kalimat = append(kalimat, "Image found : "+item[1])
-		url := "https://mosaik-ai.herokuapp.com/api/image/classify?url=" + string(item[1])
-		method := "GET"
 
-		client := &http.Client{}
-		req, err := http.NewRequest(method, url, nil)
+	_, err = nsfw.FindRecordByNSFWUrl(server.DB, nsfw.Url)
+	if err != nil {
+		//List Block belum teercantum belum ada, mari memfilter
 
+		// Request the HTML page.
+		resp, err := http.Get(nsfw.Url)
 		if err != nil {
 			responses.ERROR(w, http.StatusUnprocessableEntity, err)
 			return
 		}
-		res, err := client.Do(req)
-		if err != nil {
-			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		defer resp.Body.Close()
+		if resp.StatusCode != 200 {
+			responses.ERROR(w, resp.StatusCode, err)
 			return
 		}
-		defer res.Body.Close()
 
-		res_ai := AIResult{}
-		err = json.NewDecoder(res.Body).Decode(&res_ai)
+		htmlData, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			responses.ERROR(w, http.StatusUnprocessableEntity, err)
 			return
 		}
-		// fmt.Printf("%s", j)
-		for _, hasil := range res_ai {
-			if hasil.ClassName == "Porn" || hasil.ClassName == "Sexy" || hasil.ClassName == "Hentai" {
-				if hasil.Probability >= 30 {
-					hasil_final.isBlocked = true
-					responses.JSON(w, http.StatusOK, hasil_final)
-					return
+
+		imageRegExp := regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
+
+		subMatchSlice := imageRegExp.FindAllStringSubmatch(string(htmlData), -1)
+		for _, item := range subMatchSlice {
+			//kalimat = append(kalimat, "Image found : "+item[1])
+			url := "https://mosaik-ai.herokuapp.com/api/image/classify?url=" + string(item[1])
+			method := "GET"
+
+			client := &http.Client{}
+			req, err := http.NewRequest(method, url, nil)
+
+			if err != nil {
+				responses.ERROR(w, http.StatusUnprocessableEntity, err)
+				return
+			}
+			res, err := client.Do(req)
+			if err != nil {
+				responses.ERROR(w, http.StatusUnprocessableEntity, err)
+				return
+			}
+			defer res.Body.Close()
+
+			res_ai := AIResult{}
+			err = json.NewDecoder(res.Body).Decode(&res_ai)
+			if err != nil {
+				responses.ERROR(w, http.StatusUnprocessableEntity, err)
+				return
+			}
+			for _, hasil := range res_ai {
+				if hasil.ClassName == "Porn" || hasil.ClassName == "Sexy" || hasil.ClassName == "Hentai" {
+					if hasil.Probability >= 30 {
+						hasil_final.isBlocked = true
+						saved_url := models.NSFWUrl{}
+						//extract domain
+						re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
+
+						submatchall := re.FindAllString(nsfw.Url, -1)
+						for _, element := range submatchall {
+							saved_url.Url = string(element)
+						}
+						//save hasil ke model NSFW
+						err = saved_url.Validate()
+						if err != nil {
+							responses.ERROR(w, http.StatusUnprocessableEntity, err)
+							return
+						}
+						_, err := saved_url.SaveNSFWUrl(server.DB)
+						if err != nil {
+							formattedError := formaterror.FormatError(err.Error())
+							responses.ERROR(w, http.StatusInternalServerError, formattedError)
+							return
+						}
+						responses.JSON(w, http.StatusOK, hasil_final)
+						return
+					}
 				}
 			}
 		}
-		// log.Println("Image found : ", item[1])
+		//Tidak ada gambar atau memang web bersih
+		hasil_final.isBlocked = false
+		responses.JSON(w, http.StatusOK, hasil_final)
+		return
+	} else {
+		//List block sudah ada, gas block aja
+		hasil_final.isBlocked = true
+		responses.JSON(w, http.StatusOK, hasil_final)
+		return
 	}
-	hasil_final.isBlocked = false
-	responses.JSON(w, http.StatusOK, hasil_final)
 }
