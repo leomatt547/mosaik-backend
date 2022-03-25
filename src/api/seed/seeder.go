@@ -47,6 +47,15 @@ var urls = []models.Url{
 	},
 }
 
+var nsfw_urls = []models.NSFWUrl{
+	{
+		Url: "www.pornhub.com",
+	},
+	{
+		Url: "www.xxxvideos.com",
+	},
+}
+
 var childvisits = []models.ChildVisit{
 	{
 		UrlID:    1,
@@ -202,6 +211,11 @@ func Load(db *gorm.DB) {
 		err = db.Debug().Model(&models.Url{}).Create(&urls[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed urls table: %v", err)
+		}
+
+		err = db.Debug().Model(&models.NSFWUrl{}).Create(&nsfw_urls[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed nsfw urls table: %v", err)
 		}
 
 		childvisits[i].UrlID = urls[i].ID

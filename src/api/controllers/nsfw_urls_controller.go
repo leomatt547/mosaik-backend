@@ -16,8 +16,8 @@ import (
 )
 
 type Result struct {
-	URL       string
-	isBlocked bool
+	URL       string `json:"url"`
+	IsBlocked bool   `json:"is_blocked"`
 }
 
 type AIResult []struct {
@@ -96,10 +96,14 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 	hasil_final := Result{}
 	hasil_final.URL = nsfw.Url
 
-	_, err = nsfw.FindRecordByNSFWUrl(server.DB, nsfw.Url)
-	if err != nil {
-		//List Block belum teercantum belum ada, mari memfilter
+	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
+	domain := re.FindAllString(nsfw.Url, -1)
+	for _, element := range domain {
+		_, err = nsfw.FindRecordByNSFWUrl(server.DB, element)
+	}
+	if err != nil {
+		//List Block belum tercantum belum ada, mari memfilter
 		// Request the HTML page.
 		resp, err := http.Get(nsfw.Url)
 		if err != nil {
@@ -125,6 +129,7 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 			//kalimat = append(kalimat, "Image found : "+item[1])
 			url := "https://mosaik-ai.herokuapp.com/api/image/classify?url=" + string(item[1])
 			method := "GET"
+			fmt.Println(url)
 
 			client := &http.Client{}
 			req, err := http.NewRequest(method, url, nil)
@@ -141,15 +146,17 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 			defer res.Body.Close()
 
 			res_ai := AIResult{}
+			// fmt.Println(res.Body)
 			err = json.NewDecoder(res.Body).Decode(&res_ai)
 			if err != nil {
-				responses.ERROR(w, http.StatusUnprocessableEntity, err)
-				return
+				// responses.ERROR(w, http.StatusUnprocessableEntity, err)
+				continue
+				// return
 			}
 			for _, hasil := range res_ai {
 				if hasil.ClassName == "Porn" || hasil.ClassName == "Sexy" || hasil.ClassName == "Hentai" {
-					if hasil.Probability >= 30 {
-						hasil_final.isBlocked = true
+					if hasil.Probability >= 0.3 {
+						hasil_final.IsBlocked = true
 						saved_url := models.NSFWUrl{}
 						//extract domain
 						re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
@@ -177,12 +184,12 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 			}
 		}
 		//Tidak ada gambar atau memang web bersih
-		hasil_final.isBlocked = false
+		hasil_final.IsBlocked = false
 		responses.JSON(w, http.StatusOK, hasil_final)
 		return
 	} else {
 		//List block sudah ada, gas block aja
-		hasil_final.isBlocked = true
+		hasil_final.IsBlocked = true
 		responses.JSON(w, http.StatusOK, hasil_final)
 		return
 	}
