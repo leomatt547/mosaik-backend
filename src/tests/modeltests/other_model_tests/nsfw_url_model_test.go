@@ -83,7 +83,7 @@ func TestFindRecordByNSFWUrl(t *testing.T) {
 	}
 
 	query := "www.google.com"
-	hasil_nsfw_url, err := new_nsfw_url.FindRecordByNSFWUrl(server.DB, query)
+	hasil_nsfw_url, err := nsfwUrlInstance.FindRecordByNSFWUrl(server.DB, query)
 	if err != nil {
 		t.Errorf("this is the error find the nsfw_url: %v\n", err)
 		return

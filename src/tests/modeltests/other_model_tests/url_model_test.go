@@ -86,7 +86,7 @@ func TestFindRecordByUrl(t *testing.T) {
 	}
 
 	query := "www.google.com"
-	hasil_url, err := new_url.FindRecordByUrl(server.DB, query)
+	hasil_url, err := urlInstance.FindRecordByUrl(server.DB, query)
 	if err != nil {
 		t.Errorf("this is the error find the url: %v\n", err)
 		return
