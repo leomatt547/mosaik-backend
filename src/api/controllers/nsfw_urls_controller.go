@@ -171,12 +171,12 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 							responses.ERROR(w, http.StatusUnprocessableEntity, err)
 							return
 						}
-						_, err := saved_url.SaveNSFWUrl(server.DB)
-						if err != nil {
-							formattedError := formaterror.FormatError(err.Error())
-							responses.ERROR(w, http.StatusInternalServerError, formattedError)
-							return
-						}
+						_, _ = saved_url.SaveNSFWUrl(server.DB)
+						// if err != nil {
+						// 	formattedError := formaterror.FormatError(err.Error())
+						// 	responses.ERROR(w, http.StatusInternalServerError, formattedError)
+						// 	return
+						// }
 						responses.JSON(w, http.StatusOK, hasil_final)
 						return
 					}

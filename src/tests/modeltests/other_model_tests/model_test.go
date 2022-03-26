@@ -508,7 +508,7 @@ func seedUrls() error {
 }
 
 func seedNSFWUrls() error {
-	var urls = []models.Url{
+	var nsfw_urls = []models.NSFWUrl{
 		{
 			Url: "www.pornhub.com",
 		},
@@ -517,8 +517,8 @@ func seedNSFWUrls() error {
 		},
 	}
 
-	for i := range urls {
-		err := server.DB.Model(&models.Url{}).Create(&urls[i]).Error
+	for i := range nsfw_urls {
+		err := server.DB.Model(&models.NSFWUrl{}).Create(&nsfw_urls[i]).Error
 		if err != nil {
 			return err
 		}

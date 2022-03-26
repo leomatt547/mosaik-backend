@@ -82,7 +82,7 @@ func TestFindRecordByNSFWUrl(t *testing.T) {
 		log.Fatalf("Cannot seed nsfw_url: %v\n", err)
 	}
 
-	query := "www.google.com"
+	query := "www.pornhub.com"
 	hasil_nsfw_url, err := nsfwUrlInstance.FindRecordByNSFWUrl(server.DB, query)
 	if err != nil {
 		t.Errorf("this is the error find the nsfw_url: %v\n", err)
