@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"time"
 
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
@@ -134,7 +135,9 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 			method := "GET"
 			fmt.Println(url)
 
-			client := &http.Client{}
+			client := &http.Client{
+				Timeout: 300 * time.Second,
+			}
 			req, err := http.NewRequest(method, url, nil)
 
 			if err != nil {
