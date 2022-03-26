@@ -138,3 +138,46 @@ func TestGetNSFWUrlByID(t *testing.T) {
 		}
 	}
 }
+
+func TestSavedSearchChecker(t *testing.T) {
+	err := refreshNSFWUrlTable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	samples := []struct {
+		inputJSON    string
+		statusCode   int
+		url          string
+		isBlocked    bool
+		errorMessage string
+	}{
+		{
+			inputJSON:    `{"url":"https://m.jpnn.com/news/4-potret-seksi-dea-onlyfans-pakai-lingerie-hingga-bralette"}`,
+			statusCode:   200,
+			url:          "https://m.jpnn.com/news/4-potret-seksi-dea-onlyfans-pakai-lingerie-hingga-bralette",
+			isBlocked:    true,
+			errorMessage: "",
+		},
+	}
+
+	for _, v := range samples {
+		req, err := http.NewRequest("POST", "/nsfw", bytes.NewBufferString(v.inputJSON))
+		if err != nil {
+			t.Errorf("this is the error: %v", err)
+		}
+		rr := httptest.NewRecorder()
+		handler := http.HandlerFunc(server.SavedSearchChecker)
+		handler.ServeHTTP(rr, req)
+
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			fmt.Printf("Cannot convert to json: %v", err)
+		}
+		assert.Equal(t, rr.Code, v.statusCode)
+		if v.statusCode == 200 {
+			assert.Equal(t, responseMap["url"], v.url)
+			assert.Equal(t, responseMap["is_blocked"], v.isBlocked)
+		}
+	}
+}

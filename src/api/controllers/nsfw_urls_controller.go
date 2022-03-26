@@ -107,18 +107,21 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 		// Request the HTML page.
 		resp, err := http.Get(nsfw.Url)
 		if err != nil {
-			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			hasil_final.IsBlocked = false
+			responses.JSON(w, http.StatusOK, hasil_final)
 			return
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode != 200 {
-			responses.ERROR(w, resp.StatusCode, err)
+			hasil_final.IsBlocked = false
+			responses.JSON(w, http.StatusOK, hasil_final)
 			return
 		}
 
 		htmlData, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			hasil_final.IsBlocked = false
+			responses.JSON(w, http.StatusOK, hasil_final)
 			return
 		}
 
@@ -135,12 +138,14 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 			req, err := http.NewRequest(method, url, nil)
 
 			if err != nil {
-				responses.ERROR(w, http.StatusUnprocessableEntity, err)
+				hasil_final.IsBlocked = false
+				responses.JSON(w, http.StatusOK, hasil_final)
 				return
 			}
 			res, err := client.Do(req)
 			if err != nil {
-				responses.ERROR(w, http.StatusUnprocessableEntity, err)
+				hasil_final.IsBlocked = false
+				responses.JSON(w, http.StatusOK, hasil_final)
 				return
 			}
 			defer res.Body.Close()
@@ -155,7 +160,7 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 			}
 			for _, hasil := range res_ai {
 				if hasil.ClassName == "Porn" || hasil.ClassName == "Sexy" || hasil.ClassName == "Hentai" {
-					if hasil.Probability >= 0.3 {
+					if hasil.Probability >= 0.5 {
 						hasil_final.IsBlocked = true
 						saved_url := models.NSFWUrl{}
 						//extract domain
@@ -168,7 +173,8 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 						//save hasil ke model NSFW
 						err = saved_url.Validate()
 						if err != nil {
-							responses.ERROR(w, http.StatusUnprocessableEntity, err)
+							hasil_final.IsBlocked = false
+							responses.JSON(w, http.StatusOK, hasil_final)
 							return
 						}
 						_, _ = saved_url.SaveNSFWUrl(server.DB)
@@ -193,4 +199,58 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 		responses.JSON(w, http.StatusOK, hasil_final)
 		return
 	}
+}
+
+func (server *Server) GetImagesInLink(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	// vars := mux.Vars(r)
+	// uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusBadRequest, err)
+	// 	return
+	// }
+	var kalimat []string
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	// parent := models.Parent{}
+	nsfw := models.NSFWUrl{}
+	err = json.Unmarshal(body, &nsfw)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	kalimat = append(kalimat, "Parsing : "+nsfw.Url)
+	// log.Println("Parsing : ", nsfw.Url)
+
+	// Request the HTML page.
+	resp, err := http.Get(nsfw.Url)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		responses.ERROR(w, resp.StatusCode, err)
+		return
+	}
+
+	htmlData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	imageRegExp := regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
+
+	subMatchSlice := imageRegExp.FindAllStringSubmatch(string(htmlData), -1)
+	for _, item := range subMatchSlice {
+		kalimat = append(kalimat, "Image found : "+item[1])
+		// log.Println("Image found : ", item[1])
+	}
+	responses.JSON(w, http.StatusOK, kalimat)
 }

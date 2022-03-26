@@ -57,5 +57,6 @@ func (s *Server) initializeRoutes() {
 
 	//Web Checker
 	s.Router.HandleFunc("/nsfw", middlewares.SetMiddlewareJSON(s.SavedSearchChecker)).Methods("POST")
+	s.Router.HandleFunc("/nsfw/images", middlewares.SetMiddlewareJSON(s.GetImagesInLink)).Methods("POST")
 	s.Router.HandleFunc("/nsfw", middlewares.SetMiddlewareJSON(s.GetNSFWUrls)).Methods("GET")
 }
