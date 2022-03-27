@@ -57,14 +57,28 @@ func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) GetChilds(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
-	child := models.Child{}
-
-	childs, err := child.FindAllChilds(server.DB)
+	vars := r.URL.Query().Get("parent_id")
+	pid, err := strconv.ParseUint(vars, 10, 32)
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return
+		// Temukan semua child
+		child := models.Child{}
+
+		childs, err := child.FindAllChilds(server.DB)
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
+		responses.JSON(w, http.StatusOK, childs)
+	} else {
+		//query parent_id diterima
+		child := models.Child{}
+		childs, err2 := child.FindChildbyParentID(server.DB, uint32(pid))
+		if err2 != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err2)
+			return
+		}
+		responses.JSON(w, http.StatusOK, childs)
 	}
-	responses.JSON(w, http.StatusOK, childs)
 }
 
 func (server *Server) GetChild(w http.ResponseWriter, r *http.Request) {
