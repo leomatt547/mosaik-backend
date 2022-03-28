@@ -159,9 +159,9 @@ func (c *Child) FindAllChilds(db *gorm.DB) (*[]Child, error) {
 	return &childs, nil
 }
 
-func (c *Child) FindChildByID(db *gorm.DB, pid uint64) (*Child, error) {
+func (c *Child) FindChildByID(db *gorm.DB, cid uint64) (*Child, error) {
 	var err error
-	err = db.Debug().Model(&Child{}).Where("id = ?", pid).Take(&c).Error
+	err = db.Debug().Model(&Child{}).Where("id = ?", cid).Take(&c).Error
 	if err != nil {
 		return &Child{}, err
 	}
@@ -172,6 +172,25 @@ func (c *Child) FindChildByID(db *gorm.DB, pid uint64) (*Child, error) {
 		}
 	}
 	return c, nil
+}
+
+func (c *Child) FindChildbyParentID(db *gorm.DB, pid uint32) (*[]Child, error) {
+	var err error
+	child := []Child{}
+	err = db.Debug().Model(&Child{}).Limit(100).Where("parent_id = ?", pid).Find(&child).Error
+	if err != nil {
+		return &[]Child{}, err
+	}
+	if len(child) > 0 {
+		//Dapatkan id Parent
+		for i := range child {
+			err := db.Debug().Model(&Parent{}).Where("id = ?", pid).Take(&child[i].Parent).Error
+			if err != nil {
+				return &[]Child{}, err
+			}
+		}
+	}
+	return &child, nil
 }
 
 func (c *Child) UpdateAChild(db *gorm.DB, uid uint64) (*Child, error) {

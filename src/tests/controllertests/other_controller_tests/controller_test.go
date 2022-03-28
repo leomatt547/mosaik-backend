@@ -125,6 +125,19 @@ func refreshUrlTable() error {
 	return nil
 }
 
+func refreshNSFWUrlTable() error {
+	err := server.DB.DropTableIfExists(&models.NSFWUrl{}).Error
+	if err != nil {
+		return err
+	}
+	err = server.DB.AutoMigrate(&models.NSFWUrl{}).Error
+	if err != nil {
+		return err
+	}
+	log.Printf("Successfully refreshed NSFW url tables")
+	return nil
+}
+
 func refreshAllTable() error {
 	err := server.DB.DropTableIfExists(&models.ParentDownload{}, &models.ChildDownload{}, &models.Parent{}, &models.Child{}, &models.ChildVisit{}, &models.Url{}, &models.ParentVisit{}).Error
 	if err != nil {
@@ -149,6 +162,37 @@ func seedOneUrl() (models.Url, error) {
 		log.Fatalf("cannot seed Urls table: %v", err)
 	}
 	return url, nil
+}
+
+func seedOneNSFWUrl() (models.NSFWUrl, error) {
+	nsfw := models.NSFWUrl{
+		Url: "pornhub.com",
+	}
+
+	err := server.DB.Model(&models.NSFWUrl{}).Create(&nsfw).Error
+	if err != nil {
+		log.Fatalf("cannot seed NSFW Urls table: %v", err)
+	}
+	return nsfw, nil
+}
+
+func seedNSFWUrls() error {
+	var nsfw = []models.NSFWUrl{
+		{
+			Url: "pornhub.com",
+		},
+		{
+			Url: "xxxvideos..com",
+		},
+	}
+
+	for i := range nsfw {
+		err := server.DB.Model(&models.NSFWUrl{}).Create(&nsfw[i]).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func seedUrls() error {

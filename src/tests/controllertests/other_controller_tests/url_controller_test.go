@@ -126,7 +126,7 @@ func TestGetUrlByID(t *testing.T) {
 	}
 	for _, v := range urlSample {
 
-		req, err := http.NewRequest("GET", "/parents", nil)
+		req, err := http.NewRequest("GET", "/urls", nil)
 		if err != nil {
 			t.Errorf("This is the error: %v\n", err)
 		}
