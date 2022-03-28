@@ -273,6 +273,11 @@ func (c *Child) UpdateChildPassword(db *gorm.DB, uid uint64) (*Child, error) {
 	if err != nil {
 		return &Child{}, err
 	}
+
+	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
+	if err != nil {
+		return &Child{}, err
+	}
 	return c, nil
 }
 
