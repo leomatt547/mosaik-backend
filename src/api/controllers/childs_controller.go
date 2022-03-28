@@ -57,14 +57,28 @@ func (server *Server) CreateChild(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) GetChilds(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
-	child := models.Child{}
-
-	childs, err := child.FindAllChilds(server.DB)
+	vars := r.URL.Query().Get("parent_id")
+	pid, err := strconv.ParseUint(vars, 10, 32)
 	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return
+		// Temukan semua child
+		child := models.Child{}
+
+		childs, err := child.FindAllChilds(server.DB)
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
+		responses.JSON(w, http.StatusOK, childs)
+	} else {
+		//query parent_id diterima
+		child := models.Child{}
+		childs, err2 := child.FindChildbyParentID(server.DB, uint32(pid))
+		if err2 != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err2)
+			return
+		}
+		responses.JSON(w, http.StatusOK, childs)
 	}
-	responses.JSON(w, http.StatusOK, childs)
 }
 
 func (server *Server) GetChild(w http.ResponseWriter, r *http.Request) {
@@ -212,7 +226,7 @@ func (server *Server) UpdateChildProfile(w http.ResponseWriter, r *http.Request)
 func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
-	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	uid, err := strconv.ParseUint(vars["id"], 10, 64)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
@@ -249,11 +263,11 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = server.DB.Debug().Model(models.Child{}).Where("email = ?", data.Email).Take(&child).Error
+	err = server.DB.Debug().Model(models.Child{}).Where("id = ?", uid).Take(&child).Error
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
 	}
+
 	err = models.VerifyPassword(child.Password, data.OldPassword)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))

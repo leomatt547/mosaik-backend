@@ -488,7 +488,6 @@ func TestUpdateParentPassword(t *testing.T) {
 		id             string
 		updateJSON     string
 		statusCode     int
-		email          string
 		updatePassword string
 		tokenGiven     string
 		errorMessage   string
@@ -496,23 +495,22 @@ func TestUpdateParentPassword(t *testing.T) {
 		{
 			// Convert int32 to int first before converting to string
 			id:             strconv.Itoa(int(AuthID)),
-			updateJSON:     `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			updateJSON:     `{"oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:     200,
-			email:          "steven@gmail.com",
 			updatePassword: "newpassword",
 			tokenGiven:     tokenString,
 			errorMessage:   "",
 		},
 		{
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "", "newPassword": "newpassword"}`,
+			updateJSON:   `{"oldPassword": "", "newPassword": "newpassword"}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh old password",
 		},
 		{
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": ""}`,
+			updateJSON:   `{"oldPassword": "password", "newPassword": ""}`,
 			statusCode:   422,
 			tokenGiven:   tokenString,
 			errorMessage: "butuh new password",
@@ -520,7 +518,7 @@ func TestUpdateParentPassword(t *testing.T) {
 		{
 			// When no token was passed
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			updateJSON:   `{"oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:   401,
 			tokenGiven:   "",
 			errorMessage: "Unauthorized",
@@ -528,17 +526,10 @@ func TestUpdateParentPassword(t *testing.T) {
 		{
 			// When incorrect token was passed
 			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "steven@gmail.com", "oldPassword": "password", "newPassword": "newpassword"}`,
+			updateJSON:   `{"oldPassword": "password", "newPassword": "newpassword"}`,
 			statusCode:   401,
 			tokenGiven:   "This is incorrect token",
 			errorMessage: "Unauthorized",
-		},
-		{
-			id:           strconv.Itoa(int(AuthID)),
-			updateJSON:   `{"email": "", "oldPassword": "password", "newPassword": "newpassword"}`,
-			statusCode:   422,
-			tokenGiven:   tokenString,
-			errorMessage: "butuh email",
 		},
 		{
 			id:         "unknown",
