@@ -80,6 +80,7 @@ func (server *Server) GetNSFWUrl(w http.ResponseWriter, r *http.Request) {
 
 func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
+	start_time := time.Now()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -130,6 +131,16 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 
 		subMatchSlice := imageRegExp.FindAllStringSubmatch(string(htmlData), -1)
 		for _, item := range subMatchSlice {
+			//cek bila timeout
+			duration := time.Since(start_time)
+			if duration.Seconds() > 28 {
+				fmt.Println(duration.Seconds())
+				//asumsi konten semuanya baik
+				hasil_final.IsBlocked = false
+				responses.JSON(w, http.StatusOK, hasil_final)
+				return
+			}
+
 			//kalimat = append(kalimat, "Image found : "+item[1])
 			url := "https://mosaik-ai.herokuapp.com/api/image/classify?url=" + string(item[1])
 			method := "GET"
