@@ -26,11 +26,11 @@ func TestCreateChild(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Cannot seed parent %v\n", err)
 	}
-	token, err := server.ParentSignIn(parent.Email, "password") //Note the password in the database is already hashed, we want unhashed
+	response, err := server.ParentSignIn(parent.Email, "password") //Note the password in the database is already hashed, we want unhashed
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	samples := []struct {
 		inputJSON    string
@@ -236,11 +236,11 @@ func TestUpdateChild(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	// Get only the first child
 	for _, child := range childs {
@@ -371,11 +371,11 @@ func TestUpdateChildProfile(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	// Get only the first child
 	for _, child := range childs {
@@ -506,11 +506,11 @@ func TestUpdateChildPassword(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	// Get only the first child
 	for _, child := range childs {
@@ -612,11 +612,11 @@ func TestUpdateChildPassword(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			}
-			token, err := server.ChildSignIn(child.Email, v.updatePassword)
+			response, err := server.ChildSignIn(child.Email, v.updatePassword)
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			} else {
-				assert.NotEqual(t, token, "")
+				assert.NotEqual(t, response.Token, "")
 				assert.Equal(t, float64(child.ParentID), responseMap["parent_id"])
 			}
 		}
@@ -649,11 +649,11 @@ func TestDeleteChild(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	// Get only the second child
 	for _, child := range childs {

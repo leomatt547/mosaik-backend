@@ -25,11 +25,11 @@ func TestCreateChildDownload(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Cannot seed child %v\n", err)
 	}
-	token, err := server.ChildSignIn(child.Email, "password") //Note the password in the database is already hashed, we want unhashed
+	response, err := server.ChildSignIn(child.Email, "password") //Note the password in the database is already hashed, we want unhashed
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	samples := []struct {
 		inputJSON     string
@@ -269,11 +269,11 @@ func TestDeleteChildDownload(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	token, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
-	tokenString := fmt.Sprintf("Bearer %v", token)
+	tokenString := fmt.Sprintf("Bearer %v", response.Token)
 
 	// Get only the second childdownload
 	for _, childdownload := range childdownloads {
