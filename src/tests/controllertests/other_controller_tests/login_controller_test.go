@@ -48,11 +48,11 @@ func TestSignInParent(t *testing.T) {
 
 	for _, v := range samples {
 
-		token, err := server.ParentSignIn(v.email, v.password)
+		response, err := server.ParentSignIn(v.email, v.password)
 		if err != nil {
 			assert.Equal(t, err, errors.New(v.errorMessage))
 		} else {
-			assert.NotEqual(t, token, "")
+			assert.NotEqual(t, response.Token, "")
 		}
 	}
 }
@@ -92,11 +92,11 @@ func TestSignInChild(t *testing.T) {
 
 	for _, v := range samples {
 
-		token, err := server.ChildSignIn(v.email, v.password)
+		response, err := server.ChildSignIn(v.email, v.password)
 		if err != nil {
 			assert.Equal(t, err, errors.New(v.errorMessage))
 		} else {
-			assert.NotEqual(t, token, "")
+			assert.NotEqual(t, response.Token, "")
 		}
 	}
 }
@@ -146,11 +146,6 @@ func TestLoginParent(t *testing.T) {
 			statusCode:   422,
 			errorMessage: "butuh password",
 		},
-		{
-			inputJSON:    `{"email": "", "password": "password"}`,
-			statusCode:   422,
-			errorMessage: "butuh email",
-		},
 	}
 
 	for _, v := range samples {
@@ -163,17 +158,16 @@ func TestLoginParent(t *testing.T) {
 		handler := http.HandlerFunc(server.Login)
 		handler.ServeHTTP(rr, req)
 
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			fmt.Printf("Cannot convert to json: %v", err)
+		}
 		assert.Equal(t, rr.Code, v.statusCode)
 		if v.statusCode == 200 {
 			assert.NotEqual(t, rr.Body.String(), "")
 		}
-
 		if v.statusCode == 422 && v.errorMessage != "" {
-			responseMap := make(map[string]interface{})
-			err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
-			if err != nil {
-				t.Errorf("Cannot convert to json: %v", err)
-			}
 			assert.Equal(t, responseMap["error"], v.errorMessage)
 		}
 	}
@@ -224,11 +218,6 @@ func TestLoginChild(t *testing.T) {
 			statusCode:   422,
 			errorMessage: "butuh password",
 		},
-		{
-			inputJSON:    `{"email": "", "password": "password"}`,
-			statusCode:   422,
-			errorMessage: "butuh email",
-		},
 	}
 
 	for _, v := range samples {
@@ -241,17 +230,17 @@ func TestLoginChild(t *testing.T) {
 		handler := http.HandlerFunc(server.Login)
 		handler.ServeHTTP(rr, req)
 
+		responseMap := make(map[string]interface{})
+		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+		if err != nil {
+			t.Errorf("Cannot convert to json: %v", err)
+		}
 		assert.Equal(t, rr.Code, v.statusCode)
 		if v.statusCode == 200 {
 			assert.NotEqual(t, rr.Body.String(), "")
 		}
 
 		if v.statusCode == 422 && v.errorMessage != "" {
-			responseMap := make(map[string]interface{})
-			err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
-			if err != nil {
-				t.Errorf("Cannot convert to json: %v", err)
-			}
 			assert.Equal(t, responseMap["error"], v.errorMessage)
 		}
 	}
