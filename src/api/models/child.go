@@ -194,19 +194,6 @@ func (c *Child) FindChildbyParentID(db *gorm.DB, pid uint32) (*[]Child, error) {
 }
 
 func (c *Child) UpdateAChild(db *gorm.DB, uid uint64) (*Child, error) {
-	// var err error
-	// err = db.Debug().Model(&Child{}).Where("id = ?", c.ID).Updates(Child{Nama: c.Nama, Email: c.Email, Password: c.Password, UpdatedAt: time.Now()}).Error
-	// if err != nil {
-	// 	return &Child{}, err
-	// }
-	// if c.ID != 0 {
-	// 	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
-	// 	if err != nil {
-	// 		return &Child{}, err
-	// 	}
-	// }
-	// return c, nil
-	// To hash the password
 	err := c.BeforeSave()
 	if err != nil {
 		log.Fatal(err)
@@ -273,7 +260,6 @@ func (c *Child) UpdateChildPassword(db *gorm.DB, uid uint64) (*Child, error) {
 	if err != nil {
 		return &Child{}, err
 	}
-
 	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
 	if err != nil {
 		return &Child{}, err
