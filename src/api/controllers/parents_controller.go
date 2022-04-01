@@ -229,6 +229,53 @@ func (server *Server) UpdateParentPassword(w http.ResponseWriter, r *http.Reques
 	responses.JSON(w, http.StatusOK, updatedParent)
 }
 
+func (server *Server) ParentNewPassword(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	parent := models.Parent{}
+	err = json.Unmarshal(body, &parent)
+
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	tokenID, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	if tokenID != uint32(uid) {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+
+	parent.Prepare()
+	err = parent.Validate("newpassword")
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	updatedParent, err := parent.UpdateParentPassword(server.DB, uint32(uid))
+	if err != nil {
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		return
+	}
+	responses.JSON(w, http.StatusOK, updatedParent)
+}
+
 func (data *Data) Validate() error {
 	if data.OldPassword == "" {
 		return errors.New("butuh old password")
