@@ -43,7 +43,7 @@ func (server *Server) SendMail(w http.ResponseWriter, r *http.Request) {
 
 	// Sender data.
 	from := "mosaik.id.noreply@gmail.com"
-	password := "admin-mosaik-id"
+	password := "mosaik-id-admin"
 
 	// Receiver email address.
 	to := []string{parent.Email}
