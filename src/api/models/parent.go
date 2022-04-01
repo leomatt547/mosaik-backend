@@ -91,6 +91,21 @@ func (p *Parent) Validate(action string) error {
 		}
 		return nil
 
+	case "reset":
+		if p.Email == "" {
+			return errors.New("butuh email")
+		}
+		if err := checkmail.ValidateFormat(p.Email); err != nil {
+			return errors.New("invalid email")
+		}
+		return nil
+
+	case "newpassword":
+		if p.Password == "" {
+			return errors.New("butuh password")
+		}
+		return nil
+
 	default:
 		if p.Nama == "" {
 			return errors.New("butuh nama")
@@ -217,40 +232,7 @@ func (p *Parent) DeleteAParent(db *gorm.DB, uid uint32) (int64, error) {
 	return db.RowsAffected, nil
 }
 
-func (p *Parent) ResetParentPassword(db *gorm.DB, uid uint32) (*Parent, error) {
-	rand.Seed(time.Now().Unix())
-	minSpecialChar := 1
-	minNum := 1
-	minUpperCase := 1
-	passwordLength := 8
-	password := generatePassword(passwordLength, minSpecialChar, minNum, minUpperCase)
-
-	p.Password = password
-	err := p.BeforeSave()
-	if err != nil {
-		log.Fatal(err)
-	}
-	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
-		map[string]interface{}{
-			"password":   p.Password,
-			"updated_at": time.Now(),
-		},
-	)
-	if db.Error != nil {
-		return &Parent{}, db.Error
-	} else {
-		p.isChange = true
-	}
-
-	// This is the display the updated parent
-	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
-	if err != nil {
-		return &Parent{}, err
-	}
-	return p, nil
-}
-
-func generatePassword(passwordLength, minSpecialChar, minNum, minUpperCase int) string {
+func GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase int) string {
 	var lowerCharSet = "abcdedfghijklmnopqrst"
 	var upperCharSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	var specialCharSet = "!@#$%&*"
@@ -286,4 +268,37 @@ func generatePassword(passwordLength, minSpecialChar, minNum, minUpperCase int) 
 		inRune[i], inRune[j] = inRune[j], inRune[i]
 	})
 	return string(inRune)
+}
+
+func (p *Parent) ResetParentPassword(db *gorm.DB, uid uint32) (*Parent, string, error) {
+	rand.Seed(time.Now().Unix())
+	minSpecialChar := 1
+	minNum := 1
+	minUpperCase := 1
+	passwordLength := 8
+	password := GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase)
+
+	p.Password = password
+	err := p.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
+		map[string]interface{}{
+			"password":   p.Password,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Parent{}, password, db.Error
+	} else {
+		p.isChange = true
+	}
+
+	// This is the display the updated parent
+	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
+	if err != nil {
+		return &Parent{}, password, err
+	}
+	return p, password, nil
 }
