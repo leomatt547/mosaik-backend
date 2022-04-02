@@ -11,13 +11,13 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/login", middlewares.SetMiddlewareJSON(s.Login)).Methods("POST")
 
 	//Parents routes
+	s.Router.HandleFunc("/resetpassword", middlewares.SetMiddlewareJSON(s.SendMail)).Methods("POST")
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.CreateParent)).Methods("POST")
 	s.Router.HandleFunc("/parents/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateParentPassword)).Methods("POST")
 	s.Router.HandleFunc("/parents", middlewares.SetMiddlewareJSON(s.GetParents)).Methods("GET")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(s.GetParent)).Methods("GET")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateParentProfile))).Methods("PUT")
 	s.Router.HandleFunc("/parents/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteParent)).Methods("DELETE")
-	s.Router.HandleFunc("/parents/resetpassword", middlewares.SetMiddlewareJSON(s.SendMail)).Methods("POST")
 	s.Router.HandleFunc("/parents/newpassword/{id}", middlewares.SetMiddlewareJSON(s.ParentNewPassword)).Methods("POST")
 
 	//Child routes

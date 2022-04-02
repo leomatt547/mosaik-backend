@@ -45,6 +45,7 @@ func (p *Parent) Prepare() {
 	p.ID = 0
 	p.Nama = html.EscapeString(strings.TrimSpace(p.Nama))
 	p.Email = html.EscapeString(strings.TrimSpace(p.Email))
+	p.isChange = false
 	p.LastLogin = time.Now()
 	p.CreatedAt = time.Now()
 	p.UpdatedAt = time.Now()
@@ -207,13 +208,13 @@ func (p *Parent) UpdateParentPassword(db *gorm.DB, uid uint32) (*Parent, error) 
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
 			"password":   p.Password,
+			"isChange":   false,
 			"updated_at": time.Now(),
 		},
 	)
 	if db.Error != nil {
 		return &Parent{}, db.Error
 	}
-	p.isChange = false
 	// This is the display the updated parent
 	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
 	if err != nil {
@@ -286,13 +287,12 @@ func (p *Parent) ResetParentPassword(db *gorm.DB, uid uint32) (*Parent, string, 
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
 			"password":   p.Password,
+			"isChange":   true,
 			"updated_at": time.Now(),
 		},
 	)
 	if db.Error != nil {
 		return &Parent{}, password, db.Error
-	} else {
-		p.isChange = true
 	}
 
 	// This is the display the updated parent
