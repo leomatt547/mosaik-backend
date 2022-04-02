@@ -18,7 +18,7 @@ type Parent struct {
 	Nama      string    `gorm:"size:255;not null;" json:"nama"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
-	isChange  bool      `gorm:"default:false"`
+	IsChange  bool      `gorm:"default:false" json:"ischange"`
 	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
@@ -45,7 +45,7 @@ func (p *Parent) Prepare() {
 	p.ID = 0
 	p.Nama = html.EscapeString(strings.TrimSpace(p.Nama))
 	p.Email = html.EscapeString(strings.TrimSpace(p.Email))
-	p.isChange = false
+	p.IsChange = false
 	p.LastLogin = time.Now()
 	p.CreatedAt = time.Now()
 	p.UpdatedAt = time.Now()
@@ -208,7 +208,7 @@ func (p *Parent) UpdateParentPassword(db *gorm.DB, uid uint32) (*Parent, error) 
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
 			"password":   p.Password,
-			"isChange":   false,
+			"ischange":   false,
 			"updated_at": time.Now(),
 		},
 	)
@@ -287,7 +287,7 @@ func (p *Parent) ResetParentPassword(db *gorm.DB, uid uint32) (*Parent, string, 
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
 			"password":   p.Password,
-			"isChange":   true,
+			"ischange":   true,
 			"updated_at": time.Now(),
 		},
 	)
