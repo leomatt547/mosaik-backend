@@ -19,6 +19,7 @@ type ParentResponse struct {
 	Nama      string
 	Email     string
 	Password  string
+	IsChange  bool
 	LastLogin time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -132,6 +133,7 @@ func (server *Server) ParentSignIn(email, password string) (*ParentResponse, err
 	response.Email = getParent.Email
 	response.Nama = getParent.Nama
 	response.Password = getParent.Password
+	response.IsChange = getParent.IsChange
 	response.LastLogin = getParent.LastLogin
 	response.CreatedAt = getParent.CreatedAt
 	response.UpdatedAt = getParent.UpdatedAt
