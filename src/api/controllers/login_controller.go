@@ -31,6 +31,7 @@ type ChildResponse struct {
 	Nama      string
 	Email     string
 	Password  string
+	IsChange  bool
 	Parent    models.Parent
 	ParentID  uint32
 	LastLogin time.Time
@@ -167,6 +168,7 @@ func (server *Server) ChildSignIn(email, password string) (*ChildResponse, error
 	response.Email = getChild.Email
 	response.Nama = getChild.Nama
 	response.Password = getChild.Password
+	response.IsChange = getChild.IsChange
 	response.Parent = getChild.Parent
 	response.ParentID = getChild.Parent.ID
 	response.LastLogin = getChild.LastLogin

@@ -11,7 +11,7 @@ import (
 	"github.com/go-playground/assert/v2"
 )
 
-func TestSendMail(t *testing.T) {
+func TestSendMailParent(t *testing.T) {
 
 	refreshParentTable()
 	_, err := seedOneParent()
@@ -45,7 +45,7 @@ func TestSendMail(t *testing.T) {
 		}
 
 		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(server.SendMail)
+		handler := http.HandlerFunc(server.SendMailParent)
 		handler.ServeHTTP(rr, req)
 
 		responseMap := make(map[string]interface{})
@@ -62,3 +62,58 @@ func TestSendMail(t *testing.T) {
 		}
 	}
 }
+
+// func TestSendMailChild(t *testing.T) {
+
+// 	err := refreshParentAndChildTable()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	child, err := seedOneParentAndOneChild()
+// 	if err != nil {
+// 		fmt.Printf("This is the error %v\n", err)
+// 	}
+
+// 	samples := []struct {
+// 		inputJSON    string
+// 		statusCode   int
+// 		email        string
+// 		errorMessage string
+// 	}{
+// 		{
+// 			inputJSON:    `{"email": child.Email}`,
+// 			statusCode:   200,
+// 			errorMessage: "",
+// 		},
+// 		{
+// 			inputJSON:    `{"email": "kangmail.com"}`,
+// 			statusCode:   422,
+// 			errorMessage: "invalid email",
+// 		},
+// 	}
+
+// 	for _, v := range samples {
+
+// 		req, err := http.NewRequest("POST", "/resetpassword", bytes.NewBufferString(v.inputJSON))
+// 		if err != nil {
+// 			t.Errorf("this is the error: %v", err)
+// 		}
+
+// 		rr := httptest.NewRecorder()
+// 		handler := http.HandlerFunc(server.SendMailParent)
+// 		handler.ServeHTTP(rr, req)
+
+// 		responseMap := make(map[string]interface{})
+// 		err = json.Unmarshal(rr.Body.Bytes(), &responseMap)
+// 		if err != nil {
+// 			fmt.Printf("Cannot convert to json: %v", err)
+// 		}
+// 		assert.Equal(t, rr.Code, v.statusCode)
+// 		if v.statusCode == 200 {
+// 			assert.NotEqual(t, rr.Body.String(), "")
+// 		}
+// 		if v.statusCode == 422 && v.errorMessage != "" {
+// 			assert.Equal(t, responseMap["error"], v.errorMessage)
+// 		}
+// 	}
+// }
