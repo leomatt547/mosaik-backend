@@ -29,6 +29,8 @@ parent model tests:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/parent_model_tests
     - go test -v
+  only:
+    - main
 
 child model tests:
   stage: model tests
@@ -38,6 +40,8 @@ child model tests:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/child_model_tests
     - go test -v
+  only:
+    - main
 
 other model tests:
   stage: model tests
@@ -47,6 +51,8 @@ other model tests:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/modeltests/other_model_tests
     - go test -v
+  only:
+    - main
 
 parent controller tests:
   stage: controller tests
@@ -56,6 +62,8 @@ parent controller tests:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/parent_controller_tests
     - go test -v
+  only:
+    - main
 
 child controller tests:
   stage: controller tests
@@ -65,6 +73,8 @@ child controller tests:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/child_controller_tests
     - go test -v
+  only:
+    - main
 
 other controller tests:
   stage: controller tests
@@ -74,6 +84,8 @@ other controller tests:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME/src/tests/controllertests/other_controller_tests
     - go test -v
+  only:
+    - main
 
 build:
   stage: build
@@ -82,3 +94,5 @@ build:
     - mv $CI_PROJECT_DIR/* $GOPATH/src/$REPO_NAME/
     - cd $GOPATH/src/$REPO_NAME
     - go build -o mosaik-backend
+  only:
+    - main
