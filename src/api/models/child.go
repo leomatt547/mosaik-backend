@@ -4,6 +4,7 @@ import (
 	"errors"
 	"html"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -17,6 +18,7 @@ type Child struct {
 	Nama      string    `gorm:"size:255;not null;" json:"nama"`
 	Email     string    `gorm:"size:100;not null;unique;" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
+	IsChange  bool      `gorm:"default:false" json:"is_change"`
 	Parent    Parent    `json:"Parent"`
 	ParentID  uint32    `gorm:"not null" json:"parent_id"`
 	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
@@ -104,6 +106,20 @@ func (c *Child) Validate(action string) error {
 		}
 		return nil
 
+	case "reset":
+		if c.Email == "" {
+			return errors.New("butuh email")
+		}
+		if err := checkmail.ValidateFormat(c.Email); err != nil {
+			return errors.New("invalid email")
+		}
+		return nil
+
+	case "newpassword":
+		if c.Password == "" {
+			return errors.New("butuh password")
+		}
+		return nil
 	default:
 		if c.Nama == "" {
 			return errors.New("butuh nama")
@@ -249,6 +265,7 @@ func (c *Child) UpdateChildPassword(db *gorm.DB, uid uint64) (*Child, error) {
 	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
 		map[string]interface{}{
 			"password":   c.Password,
+			"is_change":  false,
 			"updated_at": time.Now(),
 		},
 	)
@@ -276,4 +293,42 @@ func (c *Child) DeleteAChild(db *gorm.DB, pid uint64, uid uint32) (int64, error)
 		return 0, db.Error
 	}
 	return db.RowsAffected, nil
+}
+
+func (c *Child) ResetChildPassword(db *gorm.DB, uid uint64) (*Child, string, error) {
+	rand.Seed(time.Now().Unix())
+	minSpecialChar := 1
+	minNum := 1
+	minUpperCase := 1
+	passwordLength := 8
+	password := GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase)
+
+	c.Password = password
+	err := c.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
+		map[string]interface{}{
+			"password":   c.Password,
+			"is_change":  true,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Child{}, password, db.Error
+	}
+
+	// This is the display the updated parent
+	err = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&c).Error
+	if err != nil {
+		return &Child{}, password, err
+	}
+
+	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
+	if err != nil {
+		return &Child{}, password, err
+	}
+
+	return c, password, nil
 }
