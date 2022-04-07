@@ -18,6 +18,7 @@ type Parent struct {
 	Nama      string    `gorm:"size:255;not null;" json:"nama"`
 	Email     string    `gorm:"size:100;not null;unique" json:"email"`
 	Password  string    `gorm:"size:100;not null;" json:"password"`
+	FCM       string    `gorm:"type:text" json:"fcm"`
 	IsChange  bool      `gorm:"default:false" json:"is_change"`
 	LastLogin time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"last_login"`
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
@@ -209,6 +210,28 @@ func (p *Parent) UpdateParentPassword(db *gorm.DB, uid uint32) (*Parent, error) 
 		map[string]interface{}{
 			"password":   p.Password,
 			"is_change":  false,
+			"updated_at": time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Parent{}, db.Error
+	}
+	// This is the display the updated parent
+	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
+	if err != nil {
+		return &Parent{}, err
+	}
+	return p, nil
+}
+
+func (p *Parent) UpdateParentFCM(db *gorm.DB, uid uint32) (*Parent, error) {
+	err := p.BeforeSave()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
+		map[string]interface{}{
+			"fcm":        p.FCM,
 			"updated_at": time.Now(),
 		},
 	)

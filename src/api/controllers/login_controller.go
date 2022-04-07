@@ -125,6 +125,12 @@ func (server *Server) ParentSignIn(email, password string) (*ParentResponse, err
 		return &ParentResponse{}, err
 	}
 
+	//update device token yang dimasukkin parent
+	_, err = parent.UpdateParentFCM(server.DB, parent.ID)
+	if err != nil {
+		return &ParentResponse{}, err
+	}
+
 	getParent, err := parent.FindParentByID(server.DB, uint32(parent.ID))
 	if err != nil {
 		return &ParentResponse{}, err
