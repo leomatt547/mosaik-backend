@@ -12,6 +12,7 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/notifications"
 
 	"github.com/gorilla/mux"
 )
@@ -87,7 +88,14 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	nsfw := models.NSFWUrl{}
+	type NSFW_temp struct {
+		Url       string `json:"url"`
+		ChildID   uint64 `json:"child_id"`
+		IsBlocked bool   `json:"is_blocked"`
+	}
+
+	nsfw := NSFW_temp{}
+	model_nsfw := models.NSFWUrl{}
 
 	err = json.Unmarshal(body, &nsfw)
 	if err != nil {
@@ -102,7 +110,7 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 
 	domain := re.FindAllString(nsfw.Url, -1)
 	for _, element := range domain {
-		_, err = nsfw.FindRecordByNSFWUrl(server.DB, element)
+		_, err = model_nsfw.FindRecordByNSFWUrl(server.DB, element)
 	}
 	if err != nil {
 		//List Block belum tercantum belum ada, mari memfilter
@@ -192,11 +200,16 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 							return
 						}
 						_, _ = saved_url.SaveNSFWUrl(server.DB)
-						// if err != nil {
-						// 	formattedError := formaterror.FormatError(err.Error())
-						// 	responses.ERROR(w, http.StatusInternalServerError, formattedError)
-						// 	return
-						// }
+						child := models.Child{}
+						childReceived, err := child.FindChildByID(server.DB, nsfw.ChildID)
+						if err != nil {
+							responses.ERROR(w, http.StatusInternalServerError, err)
+							return
+						}
+						parentReceived := childReceived.Parent
+						fcm_token := parentReceived.FCM
+						notifications.SendPushNotification("Akses Konten Ilegal",
+							"Anak anda yang bernama "+childReceived.Nama+" telah membuka konten negatif pada link "+nsfw.Url+" dengan waktu "+time.Now().String(), fcm_token)
 						responses.JSON(w, http.StatusOK, hasil_final)
 						return
 					}
@@ -210,6 +223,19 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 	} else {
 		//List block sudah ada, gas block aja
 		hasil_final.IsBlocked = true
+		child := models.Child{}
+		childReceived, err := child.FindChildByID(server.DB, nsfw.ChildID)
+
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
+
+		//Dapatkan token
+		parentReceived := childReceived.Parent
+		fcm_token := parentReceived.FCM
+		notifications.SendPushNotification("Akses Konten Ilegal",
+			"Anak anda yang bernama "+childReceived.Nama+" telah membuka konten negatif pada link "+nsfw.Url+" dengan waktu "+time.Now().String(), fcm_token)
 		responses.JSON(w, http.StatusOK, hasil_final)
 		return
 	}
