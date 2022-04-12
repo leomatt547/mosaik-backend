@@ -4,7 +4,6 @@ import (
 	"errors"
 	"html"
 	"log"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -106,20 +105,21 @@ func (c *Child) Validate(action string) error {
 		}
 		return nil
 
-	case "reset":
-		if c.Email == "" {
-			return errors.New("butuh email")
-		}
-		if err := checkmail.ValidateFormat(c.Email); err != nil {
-			return errors.New("invalid email")
-		}
-		return nil
+	// case "reset":
+	// 	if c.Email == "" {
+	// 		return errors.New("butuh email")
+	// 	}
+	// 	if err := checkmail.ValidateFormat(c.Email); err != nil {
+	// 		return errors.New("invalid email")
+	// 	}
+	// 	return nil
 
 	case "newpassword":
 		if c.Password == "" {
 			return errors.New("butuh password")
 		}
 		return nil
+
 	default:
 		if c.Nama == "" {
 			return errors.New("butuh nama")
@@ -295,40 +295,40 @@ func (c *Child) DeleteAChild(db *gorm.DB, pid uint64, uid uint32) (int64, error)
 	return db.RowsAffected, nil
 }
 
-func (c *Child) ResetChildPassword(db *gorm.DB, uid uint64) (*Child, string, error) {
-	rand.Seed(time.Now().Unix())
-	minSpecialChar := 1
-	minNum := 1
-	minUpperCase := 1
-	passwordLength := 8
-	password := GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase)
+// func (c *Child) ResetChildPassword(db *gorm.DB, uid uint64) (*Child, string, error) {
+// 	rand.Seed(time.Now().Unix())
+// 	minSpecialChar := 1
+// 	minNum := 1
+// 	minUpperCase := 1
+// 	passwordLength := 8
+// 	password := GeneratePassword(passwordLength, minSpecialChar, minNum, minUpperCase)
 
-	c.Password = password
-	err := c.BeforeSave()
-	if err != nil {
-		log.Fatal(err)
-	}
-	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
-		map[string]interface{}{
-			"password":   c.Password,
-			"is_change":  true,
-			"updated_at": time.Now(),
-		},
-	)
-	if db.Error != nil {
-		return &Child{}, password, db.Error
-	}
+// 	c.Password = password
+// 	err := c.BeforeSave()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	db = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&Child{}).UpdateColumns(
+// 		map[string]interface{}{
+// 			"password":   c.Password,
+// 			"is_change":  true,
+// 			"updated_at": time.Now(),
+// 		},
+// 	)
+// 	if db.Error != nil {
+// 		return &Child{}, password, db.Error
+// 	}
 
-	// This is the display the updated parent
-	err = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&c).Error
-	if err != nil {
-		return &Child{}, password, err
-	}
+// 	// This is the display the updated parent
+// 	err = db.Debug().Model(&Child{}).Where("id = ?", uid).Take(&c).Error
+// 	if err != nil {
+// 		return &Child{}, password, err
+// 	}
 
-	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
-	if err != nil {
-		return &Child{}, password, err
-	}
+// 	err = db.Debug().Model(&Parent{}).Where("id = ?", c.ParentID).Take(&c.Parent).Error
+// 	if err != nil {
+// 		return &Child{}, password, err
+// 	}
 
-	return c, password, nil
-}
+// 	return c, password, nil
+// }
