@@ -23,7 +23,8 @@ func (s *Server) initializeRoutes() {
 	//Child routes
 	// s.Router.HandleFunc("/resetpassword", middlewares.SetMiddlewareJSON(s.SendMailChild)).Methods("POST")
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.CreateChild)).Methods("POST")
-	s.Router.HandleFunc("/childs/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateChildPassword)).Methods("POST")
+	// s.Router.HandleFunc("/childs/password/{id}", middlewares.SetMiddlewareJSON(s.UpdateChildPassword)).Methods("POST")
+	s.Router.HandleFunc("/childs/password/{id}", middlewares.SetMiddlewareJSON(s.ChildNewPassword)).Methods("POST")
 	s.Router.HandleFunc("/childs", middlewares.SetMiddlewareJSON(s.GetChilds)).Methods("GET")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(s.GetChild)).Methods("GET")
 	s.Router.HandleFunc("/childs/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(s.UpdateChildProfile))).Methods("PUT")
