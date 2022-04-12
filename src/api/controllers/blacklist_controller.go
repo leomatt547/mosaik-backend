@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -14,6 +15,11 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
 )
+
+type BlacklistResult struct {
+	URL       string `json:"url"`
+	IsBlocked bool   `json:"is_blocked"`
+}
 
 func (server *Server) CreateBlackList(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
@@ -53,8 +59,6 @@ func (server *Server) GetBlacklist(w http.ResponseWriter, r *http.Request) {
 		}
 		responses.JSON(w, http.StatusOK, bls)
 	} else {
-		// vars2 := r.URL.Query().Get("url")
-		// url, err := strconv.Parse
 		bl := models.Blacklist{}
 		bls, err := bl.FindBlacklistByParentID(server.DB, uint32(pid))
 		if err != nil {
@@ -119,4 +123,42 @@ func (server *Server) DeleteBlacklist(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Entity", fmt.Sprintf("%d", pid))
 	responses.JSON(w, http.StatusNoContent, "")
+}
+
+func (server *Server) BlacklistChecker(w http.ResponseWriter, r *http.Request) {
+	//cors.EnableCors(&w)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	bl := models.Blacklist{}
+
+	err = json.Unmarshal(body, &bl)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	hasil_final := BlacklistResult{}
+	hasil_final.URL = bl.Url
+
+	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
+
+	domain := re.FindAllString(bl.Url, -1)
+	for _, element := range domain {
+		_, err = bl.FindRecordByUrl(server.DB, element)
+	}
+	if err != nil {
+		//List Block belum tercantum belum ada
+		hasil_final.IsBlocked = false
+		responses.JSON(w, http.StatusOK, hasil_final)
+		return
+	} else {
+		//List block sudah ada, perbolehkan
+		hasil_final.IsBlocked = true
+		responses.JSON(w, http.StatusOK, hasil_final)
+		return
+	}
 }
