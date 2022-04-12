@@ -111,3 +111,14 @@ func (wl *Whitelist) FindRecordByUrl(db *gorm.DB, link string) (*[]Whitelist, er
 	}
 	return &list, err
 }
+
+func (wl *Whitelist) DeleteWhitelist(db *gorm.DB, pid uint64, uid uint32) (int64, error) {
+	db = db.Debug().Model(&Whitelist{}).Where("id = ? and parent_id = ?", pid, uid).Take(&Whitelist{}).Delete(&Whitelist{})
+	if db.Error != nil {
+		if gorm.IsRecordNotFoundError(db.Error) {
+			return 0, errors.New("Whitelist not found")
+		}
+		return 0, db.Error
+	}
+	return db.RowsAffected, nil
+}
