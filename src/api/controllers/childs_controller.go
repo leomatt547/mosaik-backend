@@ -284,6 +284,53 @@ func (server *Server) UpdateChildPassword(w http.ResponseWriter, r *http.Request
 	responses.JSON(w, http.StatusOK, childUpdated)
 }
 
+func (server *Server) ChildNewPassword(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uid, err := strconv.ParseUint(vars["id"], 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	child := models.Child{}
+	err = json.Unmarshal(body, &child)
+
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	tokenID, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	if tokenID != uint32(uid) {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+
+	child.Prepare()
+	err = child.Validate("newpassword")
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	updatedChild, err := child.UpdateChildPassword(server.DB, uint64(uid))
+	if err != nil {
+		formattedError := formaterror.FormatError(err.Error())
+		responses.ERROR(w, http.StatusInternalServerError, formattedError)
+		return
+	}
+	responses.JSON(w, http.StatusOK, updatedChild)
+}
+
 func (server *Server) DeleteChild(w http.ResponseWriter, r *http.Request) {
 	//cors.EnableCors(&w)
 	vars := mux.Vars(r)
