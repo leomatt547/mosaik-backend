@@ -61,4 +61,18 @@ func (s *Server) initializeRoutes() {
 	s.Router.HandleFunc("/nsfw", middlewares.SetMiddlewareJSON(s.SavedSearchChecker)).Methods("POST")
 	s.Router.HandleFunc("/nsfw/images", middlewares.SetMiddlewareJSON(s.GetImagesInLink)).Methods("POST")
 	s.Router.HandleFunc("/nsfw", middlewares.SetMiddlewareJSON(s.GetNSFWUrls)).Methods("GET")
+
+	//Blacklist
+	s.Router.HandleFunc("/blacklist", middlewares.SetMiddlewareJSON(s.CreateBlackList)).Methods("POST")
+	s.Router.HandleFunc("/blacklist", middlewares.SetMiddlewareJSON(s.GetBlacklist)).Methods("GET")
+	s.Router.HandleFunc("/blacklist/{id}", middlewares.SetMiddlewareJSON(s.GetBlacklistByID)).Methods("GET")
+	s.Router.HandleFunc("/blacklist/check", middlewares.SetMiddlewareJSON(s.BlacklistChecker)).Methods("POST")
+	s.Router.HandleFunc("/blacklist/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteBlacklist)).Methods("DELETE")
+
+	//Whitelist
+	s.Router.HandleFunc("/whitelist", middlewares.SetMiddlewareJSON(s.CreateWhitelist)).Methods("POST")
+	s.Router.HandleFunc("/whitelist", middlewares.SetMiddlewareJSON(s.GetWhitelist)).Methods("GET")
+	s.Router.HandleFunc("/whitelist/{id}", middlewares.SetMiddlewareJSON(s.GetWhitelistByID)).Methods("GET")
+	s.Router.HandleFunc("/whitelist/check", middlewares.SetMiddlewareJSON(s.WhitelistChecker)).Methods("POST")
+	s.Router.HandleFunc("/whitelist/{id}", middlewares.SetMiddlewareAuthentication(s.DeleteWhitelist)).Methods("DELETE")
 }
