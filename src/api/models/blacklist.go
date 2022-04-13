@@ -20,9 +20,6 @@ func (bl *Blacklist) Validate() error {
 	if bl.Url == "" {
 		return errors.New("butuh url")
 	}
-	if bl.ParentID == 0 {
-		return errors.New("butuh parent_id")
-	}
 	return nil
 }
 
@@ -42,7 +39,7 @@ func (bl *Blacklist) SaveBlacklist(db *gorm.DB) (*Blacklist, error) {
 
 func (bl *Blacklist) FindAllBlacklist(db *gorm.DB) (*[]Blacklist, error) {
 	list := []Blacklist{}
-	err := db.Debug().Model(&Blacklist{}).Limit(100).Find(&bl).Error
+	err := db.Debug().Model(&Blacklist{}).Limit(100).Find(&list).Error
 	if err != nil {
 		return &[]Blacklist{}, err
 	}
@@ -92,13 +89,22 @@ func (bl *Blacklist) FindBlacklistByParentID(db *gorm.DB, pid uint32) (*[]Blackl
 	return &list, nil
 }
 
-func (bl *Blacklist) FindRecordByUrl(db *gorm.DB, link string) (*Blacklist, error) {
-	err := db.Debug().Model(&Blacklist{}).Where("url = ?", link).Take(&bl).Error
+func (bl *Blacklist) FindRecordByUrl(db *gorm.DB, link string, cid uint64) (*Blacklist, error) {
+	child := Child{}
+	err := db.Debug().Model(&Child{}).Where("id = ?", cid).Take(&child).Error
+	if err != nil {
+		return &Blacklist{}, err
+	}
+	err = db.Debug().Model(&Blacklist{}).Where("url = ? and parent_id = ?", link, child.ParentID).Take(&bl).Error
 	if err != nil {
 		return &Blacklist{}, err
 	}
 	if gorm.IsRecordNotFoundError(err) {
 		return &Blacklist{}, errors.New("Blacklist Not Found")
+	}
+	err = db.Debug().Model(&Parent{}).Where("id = ?", bl.ParentID).Take(&bl.Parent).Error
+	if err != nil {
+		return &Blacklist{}, err
 	}
 	return bl, err
 }

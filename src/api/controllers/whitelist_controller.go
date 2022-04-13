@@ -37,6 +37,12 @@ func (server *Server) CreateWhitelist(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+	uid, err := auth.ExtractTokenParentID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+	wl.ParentID = uid
 	wlCreated, err := wl.SaveWhitelist(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
@@ -146,9 +152,15 @@ func (server *Server) WhitelistChecker(w http.ResponseWriter, r *http.Request) {
 
 	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
+	uid, err := auth.ExtractTokenChildID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
 	domain := re.FindAllString(wl.Url, -1)
 	for _, element := range domain {
-		_, err = wl.FindRecordByUrl(server.DB, element)
+		_, err = wl.FindRecordByUrl(server.DB, element, uid)
 	}
 	if err != nil {
 		//List Block belum tercantum belum ada

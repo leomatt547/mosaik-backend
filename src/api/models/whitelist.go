@@ -20,9 +20,6 @@ func (wl *Whitelist) Validate() error {
 	if wl.Url == "" {
 		return errors.New("butuh url")
 	}
-	if wl.ParentID == 0 {
-		return errors.New("butuh parent_id")
-	}
 	return nil
 }
 
@@ -42,7 +39,7 @@ func (wl *Whitelist) SaveWhitelist(db *gorm.DB) (*Whitelist, error) {
 
 func (wl *Whitelist) FindAllWhitelist(db *gorm.DB) (*[]Whitelist, error) {
 	list := []Whitelist{}
-	err := db.Debug().Model(&Whitelist{}).Limit(100).Find(&wl).Error
+	err := db.Debug().Model(&Whitelist{}).Limit(100).Find(&list).Error
 	if err != nil {
 		return &[]Whitelist{}, err
 	}
@@ -92,24 +89,24 @@ func (wl *Whitelist) FindWhitelistByParentID(db *gorm.DB, pid uint32) (*[]Whitel
 	return &list, nil
 }
 
-func (wl *Whitelist) FindRecordByUrl(db *gorm.DB, link string) (*[]Whitelist, error) {
-	list := []Whitelist{}
-	err := db.Debug().Model(&Whitelist{}).Where("url = ?", link).Find(&list).Error
+func (wl *Whitelist) FindRecordByUrl(db *gorm.DB, link string, cid uint64) (*Whitelist, error) {
+	child := Child{}
+	err := db.Debug().Model(&Child{}).Where("id = ?", cid).Take(&child).Error
 	if err != nil {
-		return &[]Whitelist{}, err
+		return &Whitelist{}, err
+	}
+	err = db.Debug().Model(&Whitelist{}).Where("url = ? and parent_id = ?", link, child.ParentID).Take(&wl).Error
+	if err != nil {
+		return &Whitelist{}, err
 	}
 	if gorm.IsRecordNotFoundError(err) {
-		return &[]Whitelist{}, errors.New("Whitelist Not Found")
+		return &Whitelist{}, errors.New("Whitelist Not Found")
 	}
-	if len(list) > 0 {
-		for i := range list {
-			err := db.Debug().Model(&Parent{}).Where("id = ?", list[i].ParentID).Take(&list[i].Parent).Error
-			if err != nil {
-				return &[]Whitelist{}, err
-			}
-		}
+	err = db.Debug().Model(&Parent{}).Where("id = ?", wl.ParentID).Take(&wl.Parent).Error
+	if err != nil {
+		return &Whitelist{}, err
 	}
-	return &list, err
+	return wl, err
 }
 
 func (wl *Whitelist) DeleteWhitelist(db *gorm.DB, pid uint64, uid uint32) (int64, error) {
