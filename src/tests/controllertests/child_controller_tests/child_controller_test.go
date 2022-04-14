@@ -26,7 +26,7 @@ func TestCreateChild(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Cannot seed parent %v\n", err)
 	}
-	response, err := server.ParentSignIn(parent.Email, "password") //Note the password in the database is already hashed, we want unhashed
+	response, err := server.ParentSignIn(parent.Email, "password", parent.FCM) //Note the password in the database is already hashed, we want unhashed
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
@@ -236,7 +236,7 @@ func TestUpdateChild(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
@@ -371,7 +371,7 @@ func TestUpdateChildProfile(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
@@ -506,7 +506,7 @@ func TestUpdateChildPassword(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
@@ -649,7 +649,7 @@ func TestDeleteChild(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}

@@ -193,7 +193,7 @@ func TestUpdateParent(t *testing.T) {
 		AuthPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	response, err := server.ParentSignIn(AuthEmail, AuthPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login parent: %v\n", err)
 	}
@@ -339,7 +339,7 @@ func TestUpdateParentProfile(t *testing.T) {
 		AuthPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	response, err := server.ParentSignIn(AuthEmail, AuthPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login parent: %v\n", err)
 	}
@@ -478,7 +478,7 @@ func TestUpdateParentPassword(t *testing.T) {
 		AuthPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	response, err := server.ParentSignIn(AuthEmail, AuthPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login parent: %v\n", err)
 	}
@@ -565,7 +565,7 @@ func TestUpdateParentPassword(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			}
-			response, err := server.ParentSignIn(parent.Email, v.updatePassword)
+			response, err := server.ParentSignIn(parent.Email, v.updatePassword, "")
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			} else {
@@ -600,7 +600,7 @@ func TestParentNewPassword(t *testing.T) {
 		AuthPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	response, err := server.ParentSignIn(AuthEmail, AuthPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login parent: %v\n", err)
 	}
@@ -680,7 +680,7 @@ func TestParentNewPassword(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			}
-			response, err := server.ParentSignIn(parent.Email, v.updatePassword)
+			response, err := server.ParentSignIn(parent.Email, v.updatePassword, "")
 			if err != nil {
 				assert.Equal(t, err, errors.New(v.errorMessage))
 			} else {
@@ -717,7 +717,7 @@ func TestDeleteParent(t *testing.T) {
 		AuthPassword = "password" ////Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(AuthEmail, AuthPassword)
+	response, err := server.ParentSignIn(AuthEmail, AuthPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}
