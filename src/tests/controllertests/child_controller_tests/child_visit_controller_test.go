@@ -236,7 +236,7 @@ func TestDeleteChildVisit(t *testing.T) {
 		ParentPassword = "password" //Note the password in the database is already hashed, we want unhashed
 	}
 	//Login the parent and get the authentication token
-	response, err := server.ParentSignIn(ParentEmail, ParentPassword)
+	response, err := server.ParentSignIn(ParentEmail, ParentPassword, "")
 	if err != nil {
 		log.Fatalf("cannot login: %v\n", err)
 	}

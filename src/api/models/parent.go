@@ -225,10 +225,6 @@ func (p *Parent) UpdateParentPassword(db *gorm.DB, uid uint32) (*Parent, error) 
 }
 
 func (p *Parent) UpdateParentFCM(db *gorm.DB, uid uint32) (*Parent, error) {
-	err := p.BeforeSave()
-	if err != nil {
-		log.Fatal(err)
-	}
 	db = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&Parent{}).UpdateColumns(
 		map[string]interface{}{
 			"fcm":        p.FCM,
@@ -239,7 +235,7 @@ func (p *Parent) UpdateParentFCM(db *gorm.DB, uid uint32) (*Parent, error) {
 		return &Parent{}, db.Error
 	}
 	// This is the display the updated parent
-	err = db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
+	err := db.Debug().Model(&Parent{}).Where("id = ?", uid).Take(&p).Error
 	if err != nil {
 		return &Parent{}, err
 	}

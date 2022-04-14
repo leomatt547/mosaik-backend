@@ -77,7 +77,7 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parentdetail, err := server.ParentSignIn(parent.Email, parent.Password)
+	parentdetail, err := server.ParentSignIn(parent.Email, parent.Password, parent.FCM)
 	if err != nil {
 		//fmt.Println("errornya di:" + err.Error())
 		if err.Error() == "crypto/bcrypt: hashedPassword is not the hash of the given password" {
@@ -110,7 +110,7 @@ func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (server *Server) ParentSignIn(email, password string) (*ParentResponse, error) {
+func (server *Server) ParentSignIn(email, password, FCM string) (*ParentResponse, error) {
 	var err error
 	parent := models.Parent{}
 	response := ParentResponse{}
@@ -125,6 +125,7 @@ func (server *Server) ParentSignIn(email, password string) (*ParentResponse, err
 		return &ParentResponse{}, err
 	}
 
+	parent.FCM = FCM
 	//update device token yang dimasukkin parent
 	_, err = parent.UpdateParentFCM(server.DB, parent.ID)
 	if err != nil {

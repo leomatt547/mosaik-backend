@@ -48,7 +48,7 @@ func TestSignInParent(t *testing.T) {
 
 	for _, v := range samples {
 
-		response, err := server.ParentSignIn(v.email, v.password)
+		response, err := server.ParentSignIn(v.email, v.password, "")
 		if err != nil {
 			assert.Equal(t, err, errors.New(v.errorMessage))
 		} else {
