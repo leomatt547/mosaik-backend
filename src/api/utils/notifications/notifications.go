@@ -19,7 +19,7 @@ func SendPushNotification(title string, body string, token string) error {
 		return err
 	}
 	req.Header.Add("Authorization", "key="+os.Getenv("FIREBASE_KEY"))
-	req.Header.Add("content-type", "application/json")
+	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
