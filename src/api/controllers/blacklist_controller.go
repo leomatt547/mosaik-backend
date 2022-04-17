@@ -32,6 +32,14 @@ func (server *Server) CreateBlackList(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
+	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
+
+	domain := re.FindAllString(bl.Url, -1)
+	for _, element := range domain {
+		bl.Url = string(element)
+	}
+
 	err = bl.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -43,6 +51,7 @@ func (server *Server) CreateBlackList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bl.ParentID = uid
+
 	blCreated, err := bl.SaveBlacklist(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
@@ -150,13 +159,13 @@ func (server *Server) BlacklistChecker(w http.ResponseWriter, r *http.Request) {
 	hasil_final := BlacklistResult{}
 	hasil_final.URL = bl.Url
 
-	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
-
 	uid, err := auth.ExtractTokenChildID(r)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
+
+	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
 	domain := re.FindAllString(bl.Url, -1)
 	for _, element := range domain {
@@ -168,7 +177,7 @@ func (server *Server) BlacklistChecker(w http.ResponseWriter, r *http.Request) {
 		responses.JSON(w, http.StatusOK, hasil_final)
 		return
 	} else {
-		//List block sudah ada, perbolehkan
+		//List block sudah ada, tidak 	perbolehkan
 		hasil_final.IsBlocked = true
 		responses.JSON(w, http.StatusOK, hasil_final)
 		return
