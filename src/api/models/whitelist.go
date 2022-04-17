@@ -99,9 +99,6 @@ func (wl *Whitelist) FindRecordByUrl(db *gorm.DB, link string, cid uint64) (*Whi
 	if err != nil {
 		return &Whitelist{}, err
 	}
-	if gorm.IsRecordNotFoundError(err) {
-		return &Whitelist{}, errors.New("Whitelist Not Found")
-	}
 	err = db.Debug().Model(&Parent{}).Where("id = ?", wl.ParentID).Take(&wl.Parent).Error
 	if err != nil {
 		return &Whitelist{}, err

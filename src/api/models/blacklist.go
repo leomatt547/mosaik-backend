@@ -99,9 +99,6 @@ func (bl *Blacklist) FindRecordByUrl(db *gorm.DB, link string, cid uint64) (*Bla
 	if err != nil {
 		return &Blacklist{}, err
 	}
-	if gorm.IsRecordNotFoundError(err) {
-		return &Blacklist{}, errors.New("Blacklist Not Found")
-	}
 	err = db.Debug().Model(&Parent{}).Where("id = ?", bl.ParentID).Take(&bl.Parent).Error
 	if err != nil {
 		return &Blacklist{}, err

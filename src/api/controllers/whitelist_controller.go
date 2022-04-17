@@ -18,7 +18,7 @@ import (
 
 type WhitelistResult struct {
 	URL       string `json:"url"`
-	IsAllowed bool   `json:"is_blocked"`
+	IsAllowed bool   `json:"is_allowed"`
 }
 
 func (server *Server) CreateWhitelist(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +32,14 @@ func (server *Server) CreateWhitelist(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+
+	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
+
+	domain := re.FindAllString(wl.Url, -1)
+	for _, element := range domain {
+		wl.Url = string(element)
+	}
+
 	err = wl.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -43,6 +51,7 @@ func (server *Server) CreateWhitelist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	wl.ParentID = uid
+
 	wlCreated, err := wl.SaveWhitelist(server.DB)
 	if err != nil {
 		formattedError := formaterror.FormatError(err.Error())
