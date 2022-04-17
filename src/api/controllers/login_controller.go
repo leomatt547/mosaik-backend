@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/auth"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
@@ -15,29 +14,15 @@ import (
 )
 
 type ParentResponse struct {
-	ID        uint32
-	Nama      string
-	Email     string
-	Password  string
-	IsChange  bool
-	LastLogin time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Token     string
+	ID      uint32
+	Details models.Parent
+	Token   string
 }
 
 type ChildResponse struct {
-	ID        uint64
-	Nama      string
-	Email     string
-	Password  string
-	IsChange  bool
-	Parent    models.Parent
-	ParentID  uint32
-	LastLogin time.Time
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Token     string
+	ID      uint64
+	Details models.Child
+	Token   string
 }
 
 func (server *Server) Login(w http.ResponseWriter, r *http.Request) {
@@ -138,13 +123,7 @@ func (server *Server) ParentSignIn(email, password, FCM string) (*ParentResponse
 	}
 
 	response.ID = getParent.ID
-	response.Email = getParent.Email
-	response.Nama = getParent.Nama
-	response.Password = getParent.Password
-	response.IsChange = getParent.IsChange
-	response.LastLogin = getParent.LastLogin
-	response.CreatedAt = getParent.CreatedAt
-	response.UpdatedAt = getParent.UpdatedAt
+	response.Details = *getParent
 
 	token, err := auth.CreateTokenParent(uint32(parent.ID))
 	response.Token = token
@@ -172,15 +151,7 @@ func (server *Server) ChildSignIn(email, password string) (*ChildResponse, error
 	}
 
 	response.ID = getChild.ID
-	response.Email = getChild.Email
-	response.Nama = getChild.Nama
-	response.Password = getChild.Password
-	response.IsChange = getChild.IsChange
-	response.Parent = getChild.Parent
-	response.ParentID = getChild.Parent.ID
-	response.LastLogin = getChild.LastLogin
-	response.CreatedAt = getChild.CreatedAt
-	response.UpdatedAt = getChild.UpdatedAt
+	response.Details = *getChild
 
 	token, err := auth.CreateTokenChild(uint64(child.ID))
 	response.Token = token
