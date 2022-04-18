@@ -37,7 +37,7 @@ func (server *Server) CreateWhitelist(w http.ResponseWriter, r *http.Request) {
 
 	domain := re.FindAllString(wl.Url, -1)
 	for _, element := range domain {
-		wl.Url = string(element)
+		wl.Url = string(element[1])
 	}
 
 	err = wl.Validate()
@@ -169,7 +169,7 @@ func (server *Server) WhitelistChecker(w http.ResponseWriter, r *http.Request) {
 
 	domain := re.FindAllString(wl.Url, -1)
 	for _, element := range domain {
-		_, err = wl.FindRecordByUrl(server.DB, element, uid)
+		_, err = wl.FindRecordByUrl(server.DB, string(element[1]), uid)
 	}
 	if err != nil {
 		//List Block belum tercantum belum ada
