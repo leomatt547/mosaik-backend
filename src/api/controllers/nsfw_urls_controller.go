@@ -108,9 +108,9 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 
 	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
-	domain := re.FindAllString(nsfw.Url, -1)
+	domain := re.FindAllStringSubmatch(nsfw.Url, -1)
 	for _, element := range domain {
-		_, err = model_nsfw.FindRecordByNSFWUrl(server.DB, element)
+		_, err = model_nsfw.FindRecordByNSFWUrl(server.DB, element[1])
 	}
 	if err != nil {
 		//List Block belum tercantum belum ada, mari memfilter
@@ -188,9 +188,9 @@ func (server *Server) SavedSearchChecker(w http.ResponseWriter, r *http.Request)
 						//extract domain
 						re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
-						submatchall := re.FindAllString(nsfw.Url, -1)
+						submatchall := re.FindAllStringSubmatch(nsfw.Url, -1)
 						for _, element := range submatchall {
-							saved_url.Url = string(element)
+							saved_url.Url = string(element[1])
 						}
 						//save hasil ke model NSFW
 						err = saved_url.Validate()
