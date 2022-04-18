@@ -35,7 +35,7 @@ func (server *Server) CreateWhitelist(w http.ResponseWriter, r *http.Request) {
 
 	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
-	domain := re.FindAllString(wl.Url, -1)
+	domain := re.FindAllStringSubmatch(wl.Url, -1)
 	for _, element := range domain {
 		wl.Url = string(element[1])
 	}
@@ -167,7 +167,7 @@ func (server *Server) WhitelistChecker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	domain := re.FindAllString(wl.Url, -1)
+	domain := re.FindAllStringSubmatch(wl.Url, -1)
 	for _, element := range domain {
 		_, err = wl.FindRecordByUrl(server.DB, string(element[1]), uid)
 	}

@@ -35,7 +35,7 @@ func (server *Server) CreateBlackList(w http.ResponseWriter, r *http.Request) {
 
 	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
-	domain := re.FindAllString(bl.Url, -1)
+	domain := re.FindAllStringSubmatch(bl.Url, -1)
 	for _, element := range domain {
 		bl.Url = string(element[1])
 	}
@@ -167,7 +167,7 @@ func (server *Server) BlacklistChecker(w http.ResponseWriter, r *http.Request) {
 
 	re := regexp.MustCompile(`^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/\n]+)`)
 
-	domain := re.FindAllString(bl.Url, -1)
+	domain := re.FindAllStringSubmatch(bl.Url, -1)
 	for _, element := range domain {
 		_, err = bl.FindRecordByUrl(server.DB, string(element[1]), uid)
 	}
