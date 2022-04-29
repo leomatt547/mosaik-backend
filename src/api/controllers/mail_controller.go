@@ -7,6 +7,7 @@ import (
 	"net/smtp"
 	"strings"
 
+	_ "github.com/heroku/x/hmetrics/onload"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"

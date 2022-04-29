@@ -3,6 +3,8 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+
+	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func (server *Server) Home(w http.ResponseWriter, r *http.Request) {

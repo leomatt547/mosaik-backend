@@ -3,6 +3,8 @@ package formaterror
 import (
 	"errors"
 	"strings"
+
+	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func FormatError(err string) error {

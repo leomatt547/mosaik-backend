@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/badoux/checkmail"
+	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )

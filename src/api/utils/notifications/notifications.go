@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func SendPushNotification(title string, body string, token string) error {
