@@ -26,6 +26,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/googleapis/gax-go/v2 v2.2.0 // indirect
+	github.com/heroku/x v0.0.50
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/rs/zerolog v1.26.1 // indirect

@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	_ "github.com/heroku/x/hmetrics/onload"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/auth"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/models"
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/responses"

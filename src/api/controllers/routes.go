@@ -1,6 +1,9 @@
 package controllers
 
-import "gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/middlewares"
+import (
+	_ "github.com/heroku/x/hmetrics/onload"
+	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/middlewares"
+)
 
 func (s *Server) initializeRoutes() {
 

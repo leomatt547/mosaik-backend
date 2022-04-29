@@ -14,6 +14,7 @@ import (
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/utils/formaterror"
 
 	"github.com/gorilla/mux"
+	_ "github.com/heroku/x/hmetrics/onload"
 )
 
 func (server *Server) CreateParentVisit(w http.ResponseWriter, r *http.Request) {

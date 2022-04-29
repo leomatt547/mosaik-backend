@@ -7,6 +7,7 @@ import (
 
 	"gitlab.informatika.org/if3250_2022_37_mosaik/mosaik-backend/src/api/controllers"
 
+	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/joho/godotenv"
 )
 

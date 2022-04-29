@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jinzhu/gorm"
 )
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	_ "github.com/heroku/x/hmetrics/onload"
 	"github.com/jinzhu/gorm"
 
 	//_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql database driver
