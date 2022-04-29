@@ -15,6 +15,21 @@ require (
 )
 
 require (
+	contrib.go.opencensus.io/exporter/prometheus v0.4.1 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/go-kit/log v0.1.0 // indirect
+	github.com/go-logfmt/logfmt v0.5.0 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/prometheus/client_golang v1.11.1 // indirect
+	github.com/prometheus/client_model v0.2.0 // indirect
+	github.com/prometheus/common v0.28.0 // indirect
+	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/prometheus/statsd_exporter v0.21.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
+)
+
+require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/compute v1.5.0 // indirect
 	cloud.google.com/go/firestore v1.6.1 // indirect
@@ -22,7 +37,7 @@ require (
 	cloud.google.com/go/storage v1.10.0 // indirect
 	firebase.google.com/go v3.13.0+incompatible // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/googleapis/gax-go/v2 v2.2.0 // indirect
