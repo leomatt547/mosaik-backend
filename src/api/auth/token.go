@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/heroku/x/hmetrics/onload"
+
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
